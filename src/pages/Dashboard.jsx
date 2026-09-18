@@ -4,6 +4,7 @@ import Icon from '../components/ui/Icon'
 import Button from '../components/ui/Button'
 import RadialProgress from '../components/RadialProgress'
 import { DashboardHabitRow } from '../components/HabitCard'
+import { WeeklyRhythmChart } from '../components/ChartCard'
 import { Chip } from '../components/ui/Primitives'
 import { EmptyState, LoadingState, ErrorState } from '../components/ui/States'
 import { useHabits } from '../context/HabitsContext'
@@ -11,6 +12,8 @@ import { useAuth } from '../context/AuthContext'
 import { getDashboard } from '../api/dashboard'
 import { adaptRecommendation, parseISODateLocal } from '../api/adapters'
 import { ApiError } from '../api/client'
+
+const SHORT_DAY = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 function formatDate(d) {
   return parseISODateLocal(d).toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })
@@ -47,6 +50,14 @@ export default function Dashboard() {
   }, [habits, filter])
 
   const topRecommendation = dash?.top_recommendation ? adaptRecommendation(dash.top_recommendation) : null
+
+  const weeklyRhythm = useMemo(() => {
+    if (!dash?.weekly_statistics?.daily) return []
+    return dash.weekly_statistics.daily.map((d) => ({
+      day: SHORT_DAY[parseISODateLocal(d.date).getDay()],
+      value: d.completion_percentage,
+    }))
+  }, [dash])
 
   async function handleToggle(id) {
     await toggleComplete(id)
@@ -123,6 +134,10 @@ export default function Dashboard() {
           </span>
         </div>
       </section>
+
+      {weeklyRhythm.length > 0 && (
+        <WeeklyRhythmChart data={weeklyRhythm} title="Weekly Progress" subtitle="Completion rate over the last 7 days" />
+      )}
 
       <section className="flex flex-col gap-3">
         <div className="flex items-center justify-between gap-2">
