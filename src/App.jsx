@@ -14,20 +14,25 @@ import Statistics from './pages/Statistics'
 import Recommendations from './pages/Recommendations'
 import AiReport from './pages/AiReport'
 import AiCompanion from './pages/AiCompanion'
+import DayPlanner from './pages/DayPlanner'
 import Profile from './pages/Profile'
 
 function ProtectedLayout({ children }) {
   const { isAuthenticated } = useAuth()
-  if (!isAuthenticated) return <Navigate to="/login" replace />
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />
+  }
+
   return <AppShell>{children}</AppShell>
 }
 
 export default function App() {
   const { isAuthenticated, initializing } = useAuth()
 
-  // Wait to know real session status (GET /users/me with a stored token)
-  // before routing — otherwise a refreshed page would flash to /login even
-  // for an already-logged-in user.
+  // Wait to know real session status before routing.
+  // This prevents a logged-in user from briefly seeing /login
+  // after refreshing the page.
   if (initializing) {
     return (
       <div className="min-h-screen bg-surface flex items-center justify-center">
@@ -38,22 +43,151 @@ export default function App() {
 
   return (
     <Routes>
-      <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />
-      <Route path="/register" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Register />} />
+      {/* Public routes */}
+      <Route
+        path="/login"
+        element={
+          isAuthenticated ? (
+            <Navigate to="/dashboard" replace />
+          ) : (
+            <Login />
+          )
+        }
+      />
 
-      <Route path="/dashboard" element={<ProtectedLayout><Dashboard /></ProtectedLayout>} />
-      <Route path="/habits" element={<ProtectedLayout><MyHabits /></ProtectedLayout>} />
-      <Route path="/habits/new" element={<ProtectedLayout><AddHabit /></ProtectedLayout>} />
-      <Route path="/habits/:id/edit" element={<ProtectedLayout><EditHabit /></ProtectedLayout>} />
-      <Route path="/calendar" element={<ProtectedLayout><CalendarPage /></ProtectedLayout>} />
-      <Route path="/statistics" element={<ProtectedLayout><Statistics /></ProtectedLayout>} />
-      <Route path="/recommendations" element={<ProtectedLayout><Recommendations /></ProtectedLayout>} />
-      <Route path="/report" element={<ProtectedLayout><AiReport /></ProtectedLayout>} />
-      <Route path="/companion" element={<ProtectedLayout><AiCompanion /></ProtectedLayout>} />
-      <Route path="/profile" element={<ProtectedLayout><Profile /></ProtectedLayout>} />
+      <Route
+        path="/register"
+        element={
+          isAuthenticated ? (
+            <Navigate to="/dashboard" replace />
+          ) : (
+            <Register />
+          )
+        }
+      />
 
-      <Route path="/" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />} />
-      <Route path="*" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />} />
+      {/* Protected routes */}
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedLayout>
+            <Dashboard />
+          </ProtectedLayout>
+        }
+      />
+
+      <Route
+        path="/habits"
+        element={
+          <ProtectedLayout>
+            <MyHabits />
+          </ProtectedLayout>
+        }
+      />
+
+      <Route
+        path="/habits/new"
+        element={
+          <ProtectedLayout>
+            <AddHabit />
+          </ProtectedLayout>
+        }
+      />
+
+      <Route
+        path="/habits/:id/edit"
+        element={
+          <ProtectedLayout>
+            <EditHabit />
+          </ProtectedLayout>
+        }
+      />
+
+      <Route
+        path="/calendar"
+        element={
+          <ProtectedLayout>
+            <CalendarPage />
+          </ProtectedLayout>
+        }
+      />
+
+      <Route
+        path="/statistics"
+        element={
+          <ProtectedLayout>
+            <Statistics />
+          </ProtectedLayout>
+        }
+      />
+
+      <Route
+        path="/recommendations"
+        element={
+          <ProtectedLayout>
+            <Recommendations />
+          </ProtectedLayout>
+        }
+      />
+
+      <Route
+        path="/report"
+        element={
+          <ProtectedLayout>
+            <AiReport />
+          </ProtectedLayout>
+        }
+      />
+
+      <Route
+        path="/companion"
+        element={
+          <ProtectedLayout>
+            <AiCompanion />
+          </ProtectedLayout>
+        }
+      />
+
+      {/* Day Planner */}
+      <Route
+        path="/day-planner"
+        element={
+          <ProtectedLayout>
+            <DayPlanner />
+          </ProtectedLayout>
+        }
+      />
+
+      <Route
+        path="/profile"
+        element={
+          <ProtectedLayout>
+            <Profile />
+          </ProtectedLayout>
+        }
+      />
+
+      {/* Default route */}
+      <Route
+        path="/"
+        element={
+          <Navigate
+            to={isAuthenticated ? '/dashboard' : '/login'}
+            replace
+          />
+        }
+      />
+
+      {/* Unknown route */}
+      <Route
+        path="*"
+        element={
+          <Navigate
+            to={isAuthenticated ? '/dashboard' : '/login'}
+            replace
+          />
+        }
+      />
     </Routes>
   )
 }
