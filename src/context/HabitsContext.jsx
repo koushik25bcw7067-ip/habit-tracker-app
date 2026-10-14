@@ -6,6 +6,9 @@ import * as recApi from '../api/recommendations'
 import { adaptHabit, adaptCategory, adaptRecommendation, habitFormToApi } from '../api/adapters'
 import { ApiError } from '../api/client'
 import { useAuth } from './AuthContext'
+import { emitCompanion } from '../theme/companionBus'
+
+const MILESTONES = [3, 7, 14, 30, 50, 100]
 
 const HabitsContext = createContext(null)
 
@@ -93,6 +96,7 @@ export function HabitsProvider({ children }) {
     async (formData) => {
       const created = await habitsApi.createHabit(habitFormToApi(formData))
       await loadHabits()
+      emitCompanion('habit_created', { habit: formData?.name })
       return created
     },
     [loadHabits],
@@ -135,12 +139,26 @@ export function HabitsProvider({ children }) {
     async (id) => {
       const habit = habits.find((h) => h.id === id)
       if (!habit) return
-      if (habit.completedToday) {
+      const wasDone = habit.completedToday
+      if (wasDone) {
         await habitsApi.undoCompletion(id, todayISO())
       } else {
         await habitsApi.completeHabit(id, { completion_date: todayISO() })
       }
       await loadHabits()
+      if (wasDone) {
+        emitCompanion('habit_undone', { habit: habit.name })
+      } else {
+        const pending = habits.filter((h) => h.active && !h.completedToday && h.id !== id)
+        const streak = (habit.streak || 0) + 1
+        emitCompanion('habit_done', {
+          habit: habit.name,
+          remaining: pending.length,
+          next: pending[0]?.name,
+          streak,
+          milestone: MILESTONES.includes(streak),
+        })
+      }
     },
     [habits, loadHabits],
   )

@@ -1,9 +1,11 @@
 import { useNavigate } from 'react-router-dom'
 import HabitForm from '../components/HabitForm'
 import PageHeader from '../components/PageHeader'
+import { useTheme } from '../context/ThemeContext'
 import { useHabits } from '../context/HabitsContext'
 
 export default function AddHabit() {
+  const { t } = useTheme()
   const navigate = useNavigate()
   const { addHabit } = useHabits()
 
@@ -14,7 +16,7 @@ export default function AddHabit() {
 
   return (
     <>
-      <PageHeader title="Add Habit" subtitle="Define a new habit to track" />
+      <PageHeader title={`Add ${t('habit')}`} subtitle="Define a new habit to track" />
       <HabitForm onSubmit={handleSubmit} submitLabel="Create Habit" />
     </>
   )

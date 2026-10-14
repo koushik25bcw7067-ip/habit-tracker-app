@@ -16,20 +16,20 @@ export function WeeklyRhythmChart({ data, title, subtitle }) {
             dataKey="day"
             axisLine={false}
             tickLine={false}
-            tick={{ fontSize: 11, fill: '#464555' }}
+            tick={{ fontSize: 11, fill: 'rgb(var(--c-on-surface-variant))' }}
           />
           <Tooltip
-            cursor={{ fill: 'rgba(79,70,229,0.06)' }}
-            contentStyle={{ borderRadius: 12, border: '1px solid #e5eeff', fontSize: 12 }}
+            cursor={{ fill: 'rgb(var(--c-primary) / 0.08)' }}
+            contentStyle={{ borderRadius: 12, border: '1px solid rgb(var(--c-outline-variant))', fontSize: 12, background: 'rgb(var(--c-surface-container-lowest))', color: 'rgb(var(--c-on-surface))' }}
           />
-          <Bar dataKey="value" radius={[6, 6, 6, 6]} fill="#4f46e5" maxBarSize={22} />
+          <Bar dataKey="value" radius={[6, 6, 6, 6]} fill="rgb(var(--c-primary))" maxBarSize={22} />
         </BarChart>
       </ResponsiveContainer>
     </Card>
   )
 }
 
-export function TrendLineChart({ data, dataKey = 'value', xKey = 'label', title, subtitle, color = '#4f46e5', height = 160 }) {
+export function TrendLineChart({ data, dataKey = 'value', xKey = 'label', title, subtitle, color = 'rgb(var(--c-primary))', height = 160 }) {
   return (
     <Card className="p-4">
       {title && (
@@ -40,10 +40,10 @@ export function TrendLineChart({ data, dataKey = 'value', xKey = 'label', title,
       )}
       <ResponsiveContainer width="100%" height={height}>
         <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#eff4ff" vertical={false} />
-          <XAxis dataKey={xKey} axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#464555' }} />
-          <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#464555' }} width={30} />
-          <Tooltip contentStyle={{ borderRadius: 12, border: '1px solid #e5eeff', fontSize: 12 }} />
+          <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--c-surface-container-low))" vertical={false} />
+          <XAxis dataKey={xKey} axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: 'rgb(var(--c-on-surface-variant))' }} />
+          <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: 'rgb(var(--c-on-surface-variant))' }} width={30} />
+          <Tooltip contentStyle={{ borderRadius: 12, border: '1px solid rgb(var(--c-outline-variant))', fontSize: 12, background: 'rgb(var(--c-surface-container-lowest))', color: 'rgb(var(--c-on-surface))' }} />
           <Line type="monotone" dataKey={dataKey} stroke={color} strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 5 }} />
         </LineChart>
       </ResponsiveContainer>

@@ -1,7 +1,11 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
+import { useTheme } from './context/ThemeContext'
 import AppShell from './components/layout/AppShell'
+import FloatingMascot from './components/FloatingMascot'
+import AmbientLayer from './components/AmbientLayer'
 import { LoadingState } from './components/ui/States'
+import ThemeSelect from './pages/ThemeSelect'
 
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -9,30 +13,41 @@ import Dashboard from './pages/Dashboard'
 import MyHabits from './pages/MyHabits'
 import AddHabit from './pages/AddHabit'
 import EditHabit from './pages/EditHabit'
+import Tasks from './pages/Tasks'
+import Goals from './pages/Goals'
 import CalendarPage from './pages/CalendarPage'
 import Statistics from './pages/Statistics'
 import Recommendations from './pages/Recommendations'
 import AiReport from './pages/AiReport'
 import AiCompanion from './pages/AiCompanion'
 import DayPlanner from './pages/DayPlanner'
+import Reminders from './pages/Reminders'
+import Achievements from './pages/Achievements'
 import Profile from './pages/Profile'
 
 function ProtectedLayout({ children }) {
   const { isAuthenticated } = useAuth()
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
+  const { hasTheme, loading: themeLoading } = useTheme()
+  if (!isAuthenticated) return <Navigate to="/login" replace />
+  // Wait for the account's theme (cached copy paints instantly on refresh) so one user's look never
+  // flashes for another; send a user with no theme yet to the world picker once that is confirmed.
+  if (themeLoading) {
+    return (
+      <div className="min-h-screen bg-surface flex items-center justify-center">
+        <LoadingState label="Loading your world…" />
+      </div>
+    )
   }
-
+  if (!hasTheme) return <Navigate to="/theme-select" replace />
   return <AppShell>{children}</AppShell>
 }
 
 export default function App() {
   const { isAuthenticated, initializing } = useAuth()
 
-  // Wait to know real session status before routing.
-  // This prevents a logged-in user from briefly seeing /login
-  // after refreshing the page.
+  // Wait to know real session status (GET /users/me with a stored token)
+  // before routing — otherwise a refreshed page would flash to /login even
+  // for an already-logged-in user.
   if (initializing) {
     return (
       <div className="min-h-screen bg-surface flex items-center justify-center">
@@ -42,152 +57,34 @@ export default function App() {
   }
 
   return (
+    <>
+    <AmbientLayer />
     <Routes>
-      {/* Public routes */}
-      <Route
-        path="/login"
-        element={
-          isAuthenticated ? (
-            <Navigate to="/dashboard" replace />
-          ) : (
-            <Login />
-          )
-        }
-      />
+      <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />
+      <Route path="/register" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Register />} />
 
-      <Route
-        path="/register"
-        element={
-          isAuthenticated ? (
-            <Navigate to="/dashboard" replace />
-          ) : (
-            <Register />
-          )
-        }
-      />
+      <Route path="/theme-select" element={isAuthenticated ? <ThemeSelect /> : <Navigate to="/login" replace />} />
 
-      {/* Protected routes */}
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedLayout>
-            <Dashboard />
-          </ProtectedLayout>
-        }
-      />
+      <Route path="/dashboard" element={<ProtectedLayout><Dashboard /></ProtectedLayout>} />
+      <Route path="/habits" element={<ProtectedLayout><MyHabits /></ProtectedLayout>} />
+      <Route path="/habits/new" element={<ProtectedLayout><AddHabit /></ProtectedLayout>} />
+      <Route path="/habits/:id/edit" element={<ProtectedLayout><EditHabit /></ProtectedLayout>} />
+      <Route path="/tasks" element={<ProtectedLayout><Tasks /></ProtectedLayout>} />
+      <Route path="/goals" element={<ProtectedLayout><Goals /></ProtectedLayout>} />
+      <Route path="/calendar" element={<ProtectedLayout><CalendarPage /></ProtectedLayout>} />
+      <Route path="/statistics" element={<ProtectedLayout><Statistics /></ProtectedLayout>} />
+      <Route path="/recommendations" element={<ProtectedLayout><Recommendations /></ProtectedLayout>} />
+      <Route path="/report" element={<ProtectedLayout><AiReport /></ProtectedLayout>} />
+      <Route path="/companion" element={<ProtectedLayout><AiCompanion /></ProtectedLayout>} />
+      <Route path="/day-planner" element={<ProtectedLayout><DayPlanner /></ProtectedLayout>} />
+      <Route path="/reminders" element={<ProtectedLayout><Reminders /></ProtectedLayout>} />
+      <Route path="/achievements" element={<ProtectedLayout><Achievements /></ProtectedLayout>} />
+      <Route path="/profile" element={<ProtectedLayout><Profile /></ProtectedLayout>} />
 
-      <Route
-        path="/habits"
-        element={
-          <ProtectedLayout>
-            <MyHabits />
-          </ProtectedLayout>
-        }
-      />
-
-      <Route
-        path="/habits/new"
-        element={
-          <ProtectedLayout>
-            <AddHabit />
-          </ProtectedLayout>
-        }
-      />
-
-      <Route
-        path="/habits/:id/edit"
-        element={
-          <ProtectedLayout>
-            <EditHabit />
-          </ProtectedLayout>
-        }
-      />
-
-      <Route
-        path="/calendar"
-        element={
-          <ProtectedLayout>
-            <CalendarPage />
-          </ProtectedLayout>
-        }
-      />
-
-      <Route
-        path="/statistics"
-        element={
-          <ProtectedLayout>
-            <Statistics />
-          </ProtectedLayout>
-        }
-      />
-
-      <Route
-        path="/recommendations"
-        element={
-          <ProtectedLayout>
-            <Recommendations />
-          </ProtectedLayout>
-        }
-      />
-
-      <Route
-        path="/report"
-        element={
-          <ProtectedLayout>
-            <AiReport />
-          </ProtectedLayout>
-        }
-      />
-
-      <Route
-        path="/companion"
-        element={
-          <ProtectedLayout>
-            <AiCompanion />
-          </ProtectedLayout>
-        }
-      />
-
-      {/* Day Planner */}
-      <Route
-        path="/day-planner"
-        element={
-          <ProtectedLayout>
-            <DayPlanner />
-          </ProtectedLayout>
-        }
-      />
-
-      <Route
-        path="/profile"
-        element={
-          <ProtectedLayout>
-            <Profile />
-          </ProtectedLayout>
-        }
-      />
-
-      {/* Default route */}
-      <Route
-        path="/"
-        element={
-          <Navigate
-            to={isAuthenticated ? '/dashboard' : '/login'}
-            replace
-          />
-        }
-      />
-
-      {/* Unknown route */}
-      <Route
-        path="*"
-        element={
-          <Navigate
-            to={isAuthenticated ? '/dashboard' : '/login'}
-            replace
-          />
-        }
-      />
+      <Route path="/" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />} />
+      <Route path="*" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />} />
     </Routes>
+    <FloatingMascot />
+    </>
   )
 }

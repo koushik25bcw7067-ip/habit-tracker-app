@@ -7,6 +7,7 @@ import { HabitListCard } from '../components/HabitCard'
 import { EmptyState, LoadingState, ErrorState } from '../components/ui/States'
 import PageHeader from '../components/PageHeader'
 import { useHabits } from '../context/HabitsContext'
+import { useTheme } from '../context/ThemeContext'
 
 const SORTS = [
   { id: 'priority', label: 'Priority (High to Low)' },
@@ -17,6 +18,7 @@ const SORTS = [
 const PRIORITY_ORDER = { High: 0, Medium: 1, Low: 2 }
 
 export default function MyHabits() {
+  const { t } = useTheme()
   const navigate = useNavigate()
   const { habits, categories, toggleComplete, archive, loading, error, refresh } = useHabits()
   const [search, setSearch] = useState('')
@@ -57,13 +59,13 @@ export default function MyHabits() {
   return (
     <>
       <PageHeader
-        title="My Habits"
+        title={t('habits')}
         subtitle={`${activeCount} Active · ${archivedCount} Archived`}
         action={
           <Link to="/habits/new">
             <Button icon="add">
               <Icon name="add" size={18} className="mr-1.5" />
-              New Habit
+              {`New ${t('habit')}`}
             </Button>
           </Link>
         }
@@ -131,7 +133,7 @@ export default function MyHabits() {
         ) : filtered.length === 0 ? (
           <EmptyState
             icon="checklist"
-            title="No habits found"
+            title={t('empty_habits')}
             description="Try adjusting your filters, or add your first habit to get started."
             action={
               <Link to="/habits/new">

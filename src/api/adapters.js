@@ -123,12 +123,10 @@ const RECOMMENDATION_ICON = {
   MONTHLY_PLAN: 'calendar_month',
 }
 
-
 function titleCaseType(type) {
-  if (!type) return ''
   return type
     .split('_')
-    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+    .map((w) => w[0] + w.slice(1).toLowerCase())
     .join(' ')
 }
 

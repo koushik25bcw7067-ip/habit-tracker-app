@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import Icon from '../components/ui/Icon'
 import PageHeader from '../components/PageHeader'
 import Button from '../components/ui/Button'
 import { Field, Input } from '../components/ui/Form'
 import { Chip } from '../components/ui/Primitives'
+import MascotFace from '../components/MascotFace'
 import { useAuth } from '../context/AuthContext'
+import { useTheme } from '../context/ThemeContext'
 import { updateMe } from '../api/auth'
 import { getDashboard } from '../api/dashboard'
 import { ApiError } from '../api/client'
@@ -18,6 +21,7 @@ const TOGGLES = [
 
 export default function Profile() {
   const { user, logout } = useAuth()
+  const { world, companion, setCompanion } = useTheme()
   const [toggles, setToggles] = useState({ reminders: true, ai: true, weekly: false, sound: true })
   const [username, setUsername] = useState(user?.fullName || '')
   const [email, setEmail] = useState(user?.email || '')
@@ -62,6 +66,45 @@ export default function Profile() {
               <Chip tone="tertiary">🔥 {streak} day streak</Chip>
             </div>
           )}
+        </div>
+      </div>
+
+      <div className="bg-surface-container-lowest rounded-xl shadow-card-1 p-4 flex flex-col gap-4">
+        <Link to="/theme-select" className="flex items-center gap-4 rounded-lg hover:bg-surface-container-low transition-colors -m-1 p-1">
+          <MascotFace mascot={world.mascot} secondary={world.colors.secondary} size={48} />
+          <div className="flex-1 min-w-0">
+            <h3 className="font-display text-headline-sm text-on-surface">{world.mascot.name}</h3>
+            <p className="text-body-sm text-on-surface-variant">World: {world.label} — tap to change</p>
+          </div>
+          <Icon name="chevron_right" size={20} className="text-on-surface-variant" />
+        </Link>
+        <div className="flex flex-col gap-2 border-t border-surface-container-high pt-3">
+          {[
+            ['enabled', 'Show companion'],
+            ['roam', 'Let it stroll along the bottom'],
+            ['minimized', 'Keep it minimised'],
+          ].map(([k, label]) => (
+            <label key={k} className="flex items-center justify-between gap-3 text-body-md text-on-surface min-h-[44px]">
+              <span>{label}</span>
+              <input
+                type="checkbox"
+                className="w-5 h-5 accent-primary"
+                checked={!!companion[k]}
+                onChange={(e) => setCompanion({ [k]: e.target.checked })}
+              />
+            </label>
+          ))}
+          <label className="flex items-center justify-between gap-3 text-body-md text-on-surface min-h-[44px]">
+            <span>Chatter</span>
+            <select
+              className="rounded-md border border-surface-container-high bg-surface px-2 h-9 text-body-sm"
+              value={companion.chatter}
+              onChange={(e) => setCompanion({ chatter: e.target.value })}
+            >
+              <option value="quiet">Quiet</option>
+              <option value="normal">Normal</option>
+            </select>
+          </label>
         </div>
       </div>
 

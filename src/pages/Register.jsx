@@ -49,7 +49,7 @@ export default function Register() {
     <div className="min-h-screen bg-gradient-to-b from-primary-fixed/40 via-surface to-surface flex flex-col items-center px-gutter py-10">
       <div className="w-full max-w-sm flex flex-col items-center">
         <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-card-2 relative">
-          <Icon name="auto_awesome" size={34} className="text-white" />
+          <Icon name="auto_awesome" size={34} className="text-on-primary" />
           <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-tertiary border-2 border-surface" />
         </div>
         <h1 className="mt-4 font-display text-headline-lg text-on-surface text-center">Create your account</h1>

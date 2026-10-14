@@ -57,7 +57,7 @@ export default function CalendarGrid({ monthLabel, days, selectedDate, onSelect,
             >
               <span>{day.date}</span>
               {!isToday && !isSelected && <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT[day.status]}`} />}
-              {(isToday || isSelected) && <span className="w-1.5 h-1.5 rounded-full bg-white/80" />}
+              {(isToday || isSelected) && <span className="w-1.5 h-1.5 rounded-full bg-on-primary/80" />}
             </button>
           )
         })}

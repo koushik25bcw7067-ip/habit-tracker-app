@@ -1,4 +1,4 @@
-export default function RadialProgress({ value = 0, size = 96, stroke = 8, label, sublabel, color = '#4f46e5' }) {
+export default function RadialProgress({ value = 0, size = 96, stroke = 8, label, sublabel, color = 'rgb(var(--c-primary))' }) {
   const radius = (size - stroke) / 2
   const circumference = 2 * Math.PI * radius
   const offset = circumference - (Math.min(100, Math.max(0, value)) / 100) * circumference

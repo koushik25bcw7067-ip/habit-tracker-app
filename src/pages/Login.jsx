@@ -45,7 +45,7 @@ export default function Login() {
     <div className="min-h-screen bg-gradient-to-b from-primary-fixed/40 via-surface to-surface flex flex-col items-center px-gutter py-10">
       <div className="w-full max-w-sm flex flex-col items-center">
         <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-card-2 relative">
-          <Icon name="auto_awesome" size={34} className="text-white" />
+          <Icon name="auto_awesome" size={34} className="text-on-primary" />
           <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-tertiary border-2 border-surface" />
         </div>
 
@@ -85,7 +85,7 @@ export default function Login() {
             type="button"
             className="h-12 rounded-md bg-surface-container-low flex items-center gap-3 px-3.5 text-left hover:bg-surface-container transition-colors"
           >
-            <div className="w-8 h-8 rounded-md bg-white flex items-center justify-center shadow-card-1 text-sm font-bold">G</div>
+            <div className="w-8 h-8 rounded-md bg-surface-container-lowest flex items-center justify-center shadow-card-1 text-sm font-bold">G</div>
             <div className="flex-1 text-body-md font-semibold text-on-surface">Continue with Google</div>
             <Icon name="arrow_forward" size={16} className="text-on-surface-variant" />
           </button>

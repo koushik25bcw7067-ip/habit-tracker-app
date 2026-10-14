@@ -137,7 +137,7 @@ export default function CalendarPage() {
               {dayEntries.map((e) => (
                 <div key={e.id} className="flex items-center gap-3 py-2.5">
                   <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${e.done ? 'bg-tertiary' : 'border-2 border-outline-variant'}`}>
-                    {e.done ? <Icon name="check" size={15} className="text-white" /> : <Icon name="schedule" size={14} className="text-on-surface-variant" />}
+                    {e.done ? <Icon name="check" size={15} className="text-on-tertiary" /> : <Icon name="schedule" size={14} className="text-on-surface-variant" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-body-md font-semibold text-on-surface truncate">{e.name}</div>

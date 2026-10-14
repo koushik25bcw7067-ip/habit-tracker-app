@@ -26,7 +26,7 @@ export function HabitListCard({ habit, onToggle, onEdit, onArchive, compact = fa
               habit.completedToday ? 'bg-tertiary border-tertiary' : 'border-outline-variant hover:border-primary'
             }`}
           >
-            {habit.completedToday && <Icon name="check" size={16} className="text-white" />}
+            {habit.completedToday && <Icon name="check" size={16} className="text-on-tertiary" />}
           </button>
           <Chip tone={category.color}>{category.label}</Chip>
           <Chip tone="neutral">{habit.frequency}</Chip>
@@ -114,7 +114,7 @@ export function DashboardHabitRow({ habit, onToggle }) {
           habit.completedToday ? 'bg-tertiary border-tertiary' : 'border-outline-variant hover:border-primary'
         }`}
       >
-        {habit.completedToday && <Icon name="check" size={16} className="text-white" />}
+        {habit.completedToday && <Icon name="check" size={16} className="text-on-tertiary" />}
       </button>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5 flex-wrap">

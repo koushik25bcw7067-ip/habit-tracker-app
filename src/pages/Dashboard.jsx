@@ -5,27 +5,44 @@ import Button from '../components/ui/Button'
 import RadialProgress from '../components/RadialProgress'
 import { DashboardHabitRow } from '../components/HabitCard'
 import { WeeklyRhythmChart } from '../components/ChartCard'
-import { Chip } from '../components/ui/Primitives'
+import { Chip, Card, ProgressBar } from '../components/ui/Primitives'
 import { EmptyState, LoadingState, ErrorState } from '../components/ui/States'
 import { useHabits } from '../context/HabitsContext'
 import { useAuth } from '../context/AuthContext'
+import { useTheme } from '../context/ThemeContext'
+import { DEFAULT_VOCAB } from '../theme/themeModel'
+import { emitCompanion } from '../theme/companionBus'
 import { getDashboard } from '../api/dashboard'
+import { getNotifications } from '../api/notifications'
+import { listTasksToday, completeTask } from '../api/tasks'
+import { listGoals } from '../api/goals'
+import { listAchievements, listUserAchievements } from '../api/achievements'
 import { adaptRecommendation, parseISODateLocal } from '../api/adapters'
 import { ApiError } from '../api/client'
 
 const SHORT_DAY = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+const NOTIF_TONE = { URGENT: 'error', IMPORTANT: 'warning', NORMAL: 'primary', LOW: 'neutral' }
 
 function formatDate(d) {
   return parseISODateLocal(d).toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })
 }
 
 export default function Dashboard() {
+  const { t, vocab } = useTheme()
   const { habits, categories, toggleComplete, loading: habitsLoading } = useHabits()
   const { user } = useAuth()
   const [filter, setFilter] = useState('All')
   const [dash, setDash] = useState(null)
   const [dashLoading, setDashLoading] = useState(true)
   const [dashError, setDashError] = useState(null)
+  const [notifications, setNotifications] = useState(null)
+  const [todayTasks, setTodayTasks] = useState(null)
+  const [activeGoals, setActiveGoals] = useState(null)
+  const [xp, setXp] = useState(null)
+
+  const loadTodayTasks = useCallback(() => {
+    listTasksToday().then(setTodayTasks).catch(() => setTodayTasks(null))
+  }, [])
 
   const loadDashboard = useCallback(async () => {
     setDashLoading(true)
@@ -42,6 +59,39 @@ export default function Dashboard() {
   useEffect(() => {
     loadDashboard()
   }, [loadDashboard, habits.length])
+
+  useEffect(() => {
+    // Soft-fail on purpose: notifications are a bonus summary, not core dashboard
+    // data — a failure here should never block or error out the rest of the page.
+    getNotifications()
+      .then(setNotifications)
+      .catch(() => setNotifications(null))
+  }, [habits.length])
+
+  useEffect(() => {
+    // Same soft-fail pattern — these are supplementary Dashboard widgets, a failure in any
+    // one of them should never block the core habit/stat data above from rendering.
+    loadTodayTasks()
+    listGoals('active').then(setActiveGoals).catch(() => setActiveGoals(null))
+    Promise.all([listAchievements(), listUserAchievements()])
+      .then(([defs, unlocked]) => {
+        const totalXp = defs.filter((a) => unlocked.some((u) => u.achievement_id === a.id)).reduce((s, a) => s + a.xp, 0)
+        const latest = [...unlocked].sort((a, b) => b.unlocked_at.localeCompare(a.unlocked_at))[0]
+        const latestDef = latest ? defs.find((a) => a.id === latest.achievement_id) : null
+        setXp({ totalXp, latestName: latestDef?.name || null })
+      })
+      .catch(() => setXp(null))
+  }, [loadTodayTasks, habits.length])
+
+  async function handleCompleteTask(id) {
+    try {
+      await completeTask(id)
+      emitCompanion('task_done', { task: todayTasks?.find?.((x) => x.id === id)?.title })
+      loadTodayTasks()
+    } catch {
+      /* non-critical widget action; task page itself handles errors with full detail */
+    }
+  }
 
   const today = useMemo(() => {
     const active = habits.filter((h) => h.active)
@@ -83,16 +133,16 @@ export default function Dashboard() {
           </Chip>
         </div>
         <h1 className="font-display text-headline-lg-mobile text-on-surface tracking-tight mt-1">
-          Good morning, {user?.name} 👋
+          {vocab.greeting !== DEFAULT_VOCAB.greeting ? `${t('greeting')} 👋` : `Good morning, ${user?.name} 👋`}
         </h1>
         <p className="text-body-sm text-on-surface-variant">Ready to crush today? Small continuous reps build unstoppable momentum.</p>
 
         {dash.important_ai_insight && (
           <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-primary-container via-primary to-secondary p-4 text-on-primary shadow-card-2 mt-1">
-            <div className="absolute -right-6 -bottom-6 w-24 h-24 rounded-full bg-white/10 blur-xl pointer-events-none" />
+            <div className="absolute -right-6 -bottom-6 w-24 h-24 rounded-full bg-on-primary/10 blur-xl pointer-events-none" />
             <div className="flex items-start gap-3 relative z-10">
-              <div className="w-8 h-8 rounded-lg bg-white/20 backdrop-blur-md flex items-center justify-center flex-shrink-0">
-                <Icon name="auto_awesome" size={20} className="text-white" filled />
+              <div className="w-8 h-8 rounded-lg bg-on-primary/20 backdrop-blur-md flex items-center justify-center flex-shrink-0">
+                <Icon name="auto_awesome" size={20} className="text-on-primary" filled />
               </div>
               <div className="flex-1 min-w-0">
                 <span className="text-label-sm uppercase tracking-wider font-bold">AI Insight</span>
@@ -184,6 +234,64 @@ export default function Dashboard() {
           )}
         </div>
       </section>
+
+      {todayTasks && (todayTasks.overdue.length > 0 || todayTasks.due_today.length > 0) && (
+        <section className="flex flex-col gap-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="font-display text-headline-md text-on-surface">Today's Tasks</h2>
+            <Link to="/tasks" className="text-body-sm text-primary font-semibold">View all</Link>
+          </div>
+          {[...todayTasks.overdue, ...todayTasks.due_today].slice(0, 5).map((t) => (
+            <Card key={t.id} className="p-3 flex items-center gap-3">
+              <button
+                onClick={() => handleCompleteTask(t.id)}
+                className="w-7 h-7 rounded-full border-2 border-outline-variant hover:border-primary flex-shrink-0"
+                aria-label="Complete task"
+              />
+              <div className="flex-1 min-w-0">
+                <div className="text-body-md font-semibold text-on-surface truncate">{t.title}</div>
+              </div>
+              {todayTasks.overdue.includes(t) && <Chip tone="error">Overdue</Chip>}
+            </Card>
+          ))}
+        </section>
+      )}
+
+      {(activeGoals?.length > 0 || xp) && (
+        <section className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          {activeGoals?.length > 0 && (
+            <Link to="/goals">
+              <Card className="p-3.5 h-full flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-label-sm font-bold text-primary uppercase tracking-wide">Goals</span>
+                  <Icon name="flag" size={16} className="text-primary" />
+                </div>
+                {activeGoals.slice(0, 2).map((g) => {
+                  const pct = g.target_value ? Math.min(100, Math.round((g.current_value / g.target_value) * 100)) : null
+                  return (
+                    <div key={g.id} className="flex flex-col gap-1">
+                      <span className="text-body-sm text-on-surface truncate">{g.title}</span>
+                      {pct != null && <ProgressBar value={pct} tone="primary" />}
+                    </div>
+                  )
+                })}
+              </Card>
+            </Link>
+          )}
+          {xp && (
+            <Link to="/achievements">
+              <Card className="p-3.5 h-full flex flex-col justify-center gap-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-label-sm font-bold text-tertiary-strong uppercase tracking-wide">XP</span>
+                  <Icon name="emoji_events" size={16} className="text-tertiary-strong" />
+                </div>
+                <span className="font-display text-headline-sm text-on-surface">{xp.totalXp} XP</span>
+                {xp.latestName && <span className="text-body-sm text-on-surface-variant truncate">Latest: {xp.latestName}</span>}
+              </Card>
+            </Link>
+          )}
+        </section>
+      )}
 
       {dash.recent_activity?.length > 0 && (
         <section className="flex flex-col gap-2.5">

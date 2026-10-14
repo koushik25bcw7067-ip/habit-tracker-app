@@ -2,6 +2,70 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Theme-swappable display/heading font. Body text intentionally always stays Inter
+     (set directly below, not via this variable) — a theme-picked display font swap is a
+     visible personality change; swapping body text too risks readability at small sizes. */
+  --c-surface: 248 249 255;
+  --c-surface-dim: 203 219 245;
+  --c-surface-bright: 248 249 255;
+  --c-surface-container-lowest: 255 255 255;
+  --c-surface-container-low: 239 244 255;
+  --c-surface-container: 229 238 255;
+  --c-surface-container-high: 220 233 255;
+  --c-surface-container-highest: 211 228 254;
+  --c-on-surface: 11 28 48;
+  --c-on-surface-variant: 70 69 85;
+  --c-inverse-surface: 33 49 69;
+  --c-inverse-on-surface: 234 241 255;
+  --c-outline: 119 117 135;
+  --c-outline-variant: 199 196 216;
+  --c-surface-tint: 77 68 227;
+  --c-primary: 79 70 229;
+  --c-primary-strong: 53 37 205;
+  --c-on-primary: 255 255 255;
+  --c-primary-container: 79 70 229;
+  --c-on-primary-container: 218 215 255;
+  --c-inverse-primary: 195 192 255;
+  --c-secondary: 103 75 181;
+  --c-on-secondary: 255 255 255;
+  --c-secondary-container: 171 143 254;
+  --c-on-secondary-container: 63 30 140;
+  --c-tertiary: 16 185 129;
+  --c-tertiary-strong: 0 83 56;
+  --c-on-tertiary: 255 255 255;
+  --c-tertiary-container: 0 110 75;
+  --c-on-tertiary-container: 103 244 183;
+  --c-tertiary-fixed: 111 251 190;
+  --c-tertiary-fixed-dim: 78 222 163;
+  --c-on-tertiary-fixed: 0 33 19;
+  --c-on-tertiary-fixed-variant: 0 82 54;
+  --c-warning: 245 158 11;
+  --c-error: 186 26 26;
+  --c-on-error: 255 255 255;
+  --c-error-container: 255 218 214;
+  --c-on-error-container: 147 0 10;
+  --c-primary-fixed: 226 223 255;
+  --c-primary-fixed-dim: 195 192 255;
+  --c-on-primary-fixed: 15 0 105;
+  --c-on-primary-fixed-variant: 51 35 204;
+  --c-secondary-fixed: 232 221 255;
+  --c-secondary-fixed-dim: 206 189 255;
+  --c-on-secondary-fixed: 33 0 94;
+  --c-on-secondary-fixed-variant: 79 49 156;
+  --c-background: 248 249 255;
+  --c-on-background: 11 28 48;
+  --c-surface-variant: 211 228 254;
+  --c-slate: 100 116 139;
+  --font-display: 'Plus Jakarta Sans', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --radius-scale: 1;
+  --heading-tracking: -0.02em;
+  --heading-case: none;
+  color-scheme: light;
+}
+:root[data-theme-mode='dark'] { color-scheme: dark; }
+
 @layer base {
   html,
   body {
@@ -12,7 +76,8 @@
   }
   body {
     overscroll-behavior-y: none;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body), 'Inter', sans-serif;
+    transition: background-color 300ms ease, color 300ms ease;
   }
 }
 
@@ -52,3 +117,182 @@
     stroke-dashoffset: var(--circumference);
   }
 }
+
+
+/* ------------------------------------------------------------------ */
+/* Mascot                                                             */
+/* ------------------------------------------------------------------ */
+.mascot-svg { color: rgb(var(--c-on-surface-variant)); }
+.mascot-svg .mascot-leg,
+.mascot-svg .mascot-arm,
+.mascot-svg .mascot-eyes,
+.mascot-svg .mascot-mouth-talk { transform-box: fill-box; }
+.mascot-svg .mascot-leg { transform-origin: 50% 0%; }
+.mascot-svg .mascot-arm { transform-origin: 50% 0%; }
+.mascot-svg .mascot-eyes,
+.mascot-svg .mascot-mouth-talk { transform-origin: 50% 50%; }
+.mascot-svg .mascot-cape { transform-box: fill-box; transform-origin: 50% 0%; }
+
+.mascot-svg.is-walking .mascot-leg-l { animation: mascot-step 0.42s ease-in-out infinite; }
+.mascot-svg.is-walking .mascot-leg-r { animation: mascot-step 0.42s ease-in-out infinite reverse; }
+.mascot-svg.is-walking .mascot-body-group { animation: mascot-bob 0.42s ease-in-out infinite; }
+.mascot-svg.is-walking .mascot-arm-l { animation: mascot-swing 0.42s ease-in-out infinite; }
+.mascot-svg.is-walking .mascot-arm-r { animation: mascot-swing 0.42s ease-in-out infinite reverse; }
+.mascot-svg.is-walking .mascot-cape { animation: mascot-cape 0.42s ease-in-out infinite; }
+.mascot-svg .mascot-arm-l.is-cheer { animation: mascot-cheer-l 0.45s ease-in-out infinite alternate; }
+.mascot-svg .mascot-arm-r.is-cheer { animation: mascot-cheer-r 0.45s ease-in-out infinite alternate; }
+.mascot-svg .mascot-eyes { animation: mascot-blink 4.2s infinite; }
+.mascot-svg .mascot-mouth-talk { animation: mascot-talk 0.26s ease-in-out infinite alternate; }
+.mascot-svg .mascot-float { animation: mascot-float 3s ease-in-out infinite; }
+.mascot-svg .mascot-zzz { animation: mascot-zzz 2.4s ease-in-out infinite; }
+.mascot-svg .mascot-blink-light { animation: mascot-pulse 1.6s ease-in-out infinite; }
+.mascot-squish { transform-origin: 50% 100%; animation: mascot-squish 0.38s ease-out; }
+
+@keyframes mascot-step { 0%, 100% { transform: rotate(20deg); } 50% { transform: rotate(-20deg); } }
+@keyframes mascot-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+@keyframes mascot-swing { 0%, 100% { transform: rotate(14deg); } 50% { transform: rotate(-14deg); } }
+@keyframes mascot-cape { 0%, 100% { transform: skewX(-4deg); } 50% { transform: skewX(6deg); } }
+@keyframes mascot-cheer-l { from { transform: rotate(0deg); } to { transform: rotate(-150deg); } }
+@keyframes mascot-cheer-r { from { transform: rotate(0deg); } to { transform: rotate(150deg); } }
+@keyframes mascot-blink { 0%, 93%, 100% { transform: scaleY(1); } 96% { transform: scaleY(0.1); } }
+@keyframes mascot-talk { from { transform: scaleY(0.35); } to { transform: scaleY(1.15); } }
+@keyframes mascot-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2.5px); } }
+@keyframes mascot-zzz { 0% { opacity: 0; transform: translate(0, 6px); } 40% { opacity: 1; } 100% { opacity: 0; transform: translate(4px, -8px); } }
+@keyframes mascot-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+@keyframes mascot-squish {
+  0% { transform: scale(1, 1); }
+  30% { transform: scale(1.2, 0.75); }
+  60% { transform: scale(0.92, 1.12); }
+  100% { transform: scale(1, 1); }
+}
+@keyframes mascot-pop { from { opacity: 0; transform: translateX(calc(-50% + var(--bo, 0px))) scale(0.8); } to { opacity: 1; transform: translateX(calc(-50% + var(--bo, 0px))) scale(1); } }
+
+.mascot-bubble {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  margin-bottom: 10px;
+  width: max-content;
+  max-width: min(220px, calc(100vw - 16px));
+  padding: 8px 12px;
+  border-radius: 14px;
+  border: 2px solid rgb(var(--c-primary));
+  background: rgb(var(--c-surface-container-lowest));
+  color: rgb(var(--c-on-surface));
+  font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  box-shadow: 0 8px 24px rgb(var(--c-primary) / 0.18);
+  transform: translateX(calc(-50% + var(--bo, 0px)));
+  animation: mascot-pop 0.22s ease-out;
+  text-align: left;
+}
+.mascot-bubble.is-below { bottom: auto; top: 100%; margin-bottom: 0; margin-top: 10px; }
+.mascot-bubble-tail {
+  position: absolute;
+  left: calc(50% - var(--bo, 0px));
+  bottom: -7px;
+  width: 12px;
+  height: 12px;
+  background: rgb(var(--c-surface-container-lowest));
+  border-right: 2px solid rgb(var(--c-primary));
+  border-bottom: 2px solid rgb(var(--c-primary));
+  transform: translateX(-50%) rotate(45deg);
+}
+.mascot-bubble.is-below .mascot-bubble-tail {
+  bottom: auto;
+  top: -7px;
+  border: 0;
+  border-left: 2px solid rgb(var(--c-primary));
+  border-top: 2px solid rgb(var(--c-primary));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mascot-svg *, .mascot-squish, .mascot-bubble { animation: none !important; }
+  body { transition: none; }
+}
+
+.mascot-svg .mascot-thought { animation: mascot-think 1.6s ease-in-out infinite; }
+.mascot-svg .mascot-confetti { animation: mascot-confetti 0.9s ease-out infinite; }
+@keyframes mascot-think { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+@keyframes mascot-confetti { 0% { opacity: 0; transform: translateY(6px) scale(0.6); } 40% { opacity: 1; } 100% { opacity: 0; transform: translateY(-8px) scale(1.1); } }
+
+/* ------------------------------------------------------------------ */
+/* Worlds: global effects driven by <html data-*> set in applyTheme()  */
+/* ------------------------------------------------------------------ */
+html :is(h1, h2, h3, h4, .font-display) {
+  letter-spacing: var(--heading-tracking);
+  text-transform: var(--heading-case);
+}
+/* keep numbers/inputs inside headings-styled elements readable */
+html input, html textarea, html select, html button { font-family: inherit; }
+html input, html textarea, html select { text-transform: none; letter-spacing: normal; }
+
+/* Card borders: ornate (engraved double rule) / glow (soft neon). plain = untouched. */
+html[data-border='ornate'] :is(.shadow-card-1, .shadow-card-2) {
+  box-shadow:
+    inset 0 0 0 1px rgb(var(--c-primary) / 0.45),
+    inset 0 0 0 4px rgb(var(--c-surface-container-lowest)),
+    inset 0 0 0 5px rgb(var(--c-primary) / 0.2),
+    0 6px 20px rgb(var(--c-primary) / 0.1);
+}
+html[data-border='glow'] :is(.shadow-card-1, .shadow-card-2) {
+  box-shadow: 0 0 0 1px rgb(var(--c-primary) / 0.35), 0 0 18px rgb(var(--c-primary) / 0.16);
+}
+
+/* Subtle full-page texture (pure CSS/SVG data URIs, no network). Above content, but nearly transparent. */
+html[data-texture]:not([data-texture='none']) body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 30;
+  opacity: 0.07;
+  background-repeat: repeat;
+}
+html[data-texture='stone'] body::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='80'%3E%3Cg fill='none' stroke='%23888' stroke-width='1.2'%3E%3Cpath d='M0 0h120M0 40h120M0 80h120M30 0v40M90 0v40M60 40v40M0 40v40M120 40v40'/%3E%3C/g%3E%3C/svg%3E");
+}
+html[data-texture='grid'] body::after {
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cpath d='M32 0H0v32' fill='none' stroke='%23888' stroke-width='1'/%3E%3C/svg%3E");
+}
+html[data-texture='stars'] body::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cg fill='%23888'%3E%3Ccircle cx='12' cy='20' r='1.2'/%3E%3Ccircle cx='70' cy='12' r='.8'/%3E%3Ccircle cx='100' cy='64' r='1.4'/%3E%3Ccircle cx='38' cy='88' r='.9'/%3E%3Ccircle cx='84' cy='108' r='1'/%3E%3C/g%3E%3C/svg%3E");
+}
+html[data-texture='sparkle'] body::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cg stroke='%23888' stroke-width='1.2' stroke-linecap='round'%3E%3Cpath d='M20 14v8M16 18h8M66 58v8M62 62h8M70 14v4M68 16h4'/%3E%3C/g%3E%3C/svg%3E");
+}
+html[data-texture='dots'] body::after {
+  opacity: 0.09;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Ccircle cx='3' cy='3' r='1.4' fill='%23888'/%3E%3C/svg%3E");
+}
+
+/* Ambient particles (AmbientLayer) */
+.ambient-layer { position: fixed; inset: 0; pointer-events: none; z-index: 5; overflow: hidden; }
+.ambient-p { position: absolute; color: rgb(var(--c-primary)); opacity: 0; will-change: transform, opacity; }
+.ambient-rise .ambient-p { bottom: -24px; animation: ambient-rise var(--d, 14s) linear var(--delay, 0s) infinite; }
+.ambient-fall .ambient-p { top: -24px; animation: ambient-fall var(--d, 16s) linear var(--delay, 0s) infinite; }
+.ambient-twinkle .ambient-p { animation: ambient-twinkle var(--d, 5s) ease-in-out var(--delay, 0s) infinite; }
+.ambient-drift .ambient-p { color: rgb(var(--c-primary) / 0.35); filter: blur(18px); border-radius: 9999px; background: currentColor; animation: ambient-drift var(--d, 40s) linear var(--delay, 0s) infinite; }
+@keyframes ambient-rise { 0% { transform: translateY(0) translateX(0); opacity: 0; } 12% { opacity: 0.5; } 100% { transform: translateY(-105vh) translateX(var(--dx, 20px)); opacity: 0; } }
+@keyframes ambient-fall { 0% { transform: translateY(0) translateX(0); opacity: 0; } 12% { opacity: 0.45; } 100% { transform: translateY(105vh) translateX(var(--dx, -20px)); opacity: 0; } }
+@keyframes ambient-twinkle { 0%, 100% { opacity: 0; transform: scale(0.6); } 50% { opacity: 0.55; transform: scale(1.1); } }
+@keyframes ambient-drift { 0% { transform: translateX(-30vw); opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { transform: translateX(130vw); opacity: 0; } }
+
+/* Companion */
+.companion-dock { transition: transform 4s linear; }
+.companion-panel { animation: mascot-panel-in 0.18s ease-out; }
+@keyframes mascot-panel-in { from { opacity: 0; transform: translateY(8px) scale(0.97); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .ambient-layer { display: none; }
+  .companion-dock { transition: none; }
+  .companion-panel { animation: none; }
+}
+
+/* idle float (only when not walking) */
+.mascot-svg:not(.is-walking) .mascot-body-group { animation: mascot-idle-float 3.4s ease-in-out infinite; }
+@keyframes mascot-idle-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2.5px); } }
