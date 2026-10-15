@@ -105,7 +105,7 @@ export default function Login() {
               <Icon name="alternate_email" size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant" />
               <Input
                 type="email"
-                placeholder="koushik@university.edu"
+                placeholder="you@example.com"
                 className="pl-10"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}

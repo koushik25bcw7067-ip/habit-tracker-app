@@ -68,10 +68,10 @@ export default function Register() {
 
         <form onSubmit={handleSubmit} className="w-full mt-4 bg-surface-container-lowest rounded-xl shadow-card-1 p-5 flex flex-col gap-4">
           <Field label="Username" required error={errors.username}>
-            <Input placeholder="koushik.rao" value={form.username} onChange={(e) => set('username', e.target.value)} error={errors.username} />
+            <Input placeholder="your.name" value={form.username} onChange={(e) => set('username', e.target.value)} error={errors.username} />
           </Field>
           <Field label="Email" required error={errors.email}>
-            <Input type="email" placeholder="koushik@university.edu" value={form.email} onChange={(e) => set('email', e.target.value)} error={errors.email} />
+            <Input type="email" placeholder="you@example.com" value={form.email} onChange={(e) => set('email', e.target.value)} error={errors.email} />
           </Field>
           <Field label="Password" required hint="At least 8 characters" error={errors.password}>
             <Input type="password" placeholder="Create a password" value={form.password} onChange={(e) => set('password', e.target.value)} error={errors.password} />
