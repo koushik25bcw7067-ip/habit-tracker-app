@@ -89,9 +89,21 @@ function buildQuery(params) {
  * @param {boolean} [opts.auth] - attach Authorization header (default true)
  */
 export async function apiFetch(path, opts = {}) {
-  const { method = 'GET', body, query, auth = true, _retry = true } = opts
+  const {
+    method = 'GET',
+    body,
+    rawBody,
+    query,
+    headers: extraHeaders = {},
+    responseType = 'json',
+    auth = true,
+    _retry = true,
+  } = opts
 
-  const headers = { 'Content-Type': 'application/json' }
+  const headers = {
+    ...(rawBody === undefined ? { 'Content-Type': 'application/json' } : {}),
+    ...extraHeaders,
+  }
   if (auth) {
     const token = getAccessToken()
     if (token) headers.Authorization = `Bearer ${token}`
@@ -102,7 +114,7 @@ export async function apiFetch(path, opts = {}) {
     res = await fetch(`${BASE_URL}${path}${buildQuery(query)}`, {
       method,
       headers,
-      body: body !== undefined ? JSON.stringify(body) : undefined,
+      body: rawBody !== undefined ? rawBody : body !== undefined ? JSON.stringify(body) : undefined,
     })
   } catch (err) {
     throw new ApiError('Cannot reach the backend. Is it running?', 0)
@@ -141,6 +153,8 @@ export async function apiFetch(path, opts = {}) {
   }
 
   if (res.status === 204) return null
+  if (responseType === 'response') return res
+  if (responseType === 'blob') return res.blob()
   const text = await res.text()
   return text ? JSON.parse(text) : null
 }

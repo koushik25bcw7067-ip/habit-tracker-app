@@ -61,6 +61,33 @@ export default function Dashboard() {
   }, [loadDashboard, habits.length])
 
   useEffect(() => {
+    const refreshWhenVisible = async () => {
+      if (document.visibilityState !== 'visible') return
+      try {
+        setDash(await getDashboard())
+        setDashError(null)
+      } catch (err) {
+        setDashError(err instanceof ApiError ? err.message : 'Could not refresh your dashboard')
+      }
+      loadTodayTasks()
+    }
+    const refreshAfterCompanionAction = () => {
+      loadDashboard()
+      loadTodayTasks()
+    }
+    window.addEventListener('focus', refreshWhenVisible)
+    document.addEventListener('visibilitychange', refreshWhenVisible)
+    window.addEventListener('companion:action', refreshAfterCompanionAction)
+    const interval = window.setInterval(refreshWhenVisible, 60_000)
+    return () => {
+      window.removeEventListener('focus', refreshWhenVisible)
+      document.removeEventListener('visibilitychange', refreshWhenVisible)
+      window.removeEventListener('companion:action', refreshAfterCompanionAction)
+      window.clearInterval(interval)
+    }
+  }, [loadDashboard, loadTodayTasks])
+
+  useEffect(() => {
     // Soft-fail on purpose: notifications are a bonus summary, not core dashboard
     // data — a failure here should never block or error out the rest of the page.
     getNotifications()

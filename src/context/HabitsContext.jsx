@@ -7,6 +7,11 @@ import { adaptHabit, adaptCategory, adaptRecommendation, habitFormToApi } from '
 import { ApiError } from '../api/client'
 import { useAuth } from './AuthContext'
 import { emitCompanion } from '../theme/companionBus'
+import {
+  emitCompanionAction,
+  getCompanionChanges,
+  listCompanionDevices,
+} from '../api/companion'
 
 const MILESTONES = [3, 7, 14, 30, 50, 100]
 
@@ -91,6 +96,100 @@ export function HabitsProvider({ children }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated])
+
+  useEffect(() => {
+    if (!isAuthenticated) return undefined
+    const refreshWhenVisible = () => {
+      if (document.visibilityState !== 'visible') return
+      loadHabits().catch((err) => {
+        setError(err instanceof ApiError ? err.message : 'Failed to refresh your habits')
+      })
+    }
+    window.addEventListener('focus', refreshWhenVisible)
+    document.addEventListener('visibilitychange', refreshWhenVisible)
+    const interval = window.setInterval(refreshWhenVisible, 60_000)
+    return () => {
+      window.removeEventListener('focus', refreshWhenVisible)
+      document.removeEventListener('visibilitychange', refreshWhenVisible)
+      window.clearInterval(interval)
+    }
+  }, [isAuthenticated, loadHabits])
+
+  useEffect(() => {
+    if (!isAuthenticated) return undefined
+    let interval = null
+    let stopped = false
+    let inFlight = false
+    let lastActionAt = null
+
+    const stopPolling = () => {
+      if (interval !== null) window.clearInterval(interval)
+      interval = null
+    }
+    const onAction = (event) => {
+      const actionType = event.detail?.action_type
+      if (!actionType?.endsWith('_habit')) return
+      loadHabits().catch((err) => {
+        setError(err instanceof ApiError ? err.message : 'Could not refresh companion changes')
+      })
+    }
+    const startPolling = async () => {
+      stopPolling()
+      try {
+        const devices = await listCompanionDevices()
+        if (stopped || !devices.some((device) => device.paired_at && !device.revoked_at)) return
+        const changes = await getCompanionChanges()
+        lastActionAt = changes.action_at
+        if (stopped) return
+        if (changes.action_at) emitCompanionAction(changes.action_type)
+        interval = window.setInterval(async () => {
+          if (document.visibilityState !== 'visible' || inFlight) return
+          inFlight = true
+          try {
+            const changes = await getCompanionChanges()
+            if (changes.action_at && changes.action_at !== lastActionAt) {
+              lastActionAt = changes.action_at
+              emitCompanionAction(changes.action_type)
+            }
+          } catch (err) {
+            stopPolling()
+            setError(err instanceof ApiError ? err.message : 'Could not sync companion changes')
+          } finally {
+            inFlight = false
+          }
+        }, 3000)
+      } catch (err) {
+        if (!stopped) {
+          setError(err instanceof ApiError ? err.message : 'Could not sync companion devices')
+        }
+      }
+    }
+    const onDeviceChange = () => startPolling()
+    const onStorage = (event) => {
+      if (event.key === 'habit_tracker_companion_devices') onDeviceChange()
+      if (event.key === 'habit_tracker_companion_action' && event.newValue) {
+        try {
+          window.dispatchEvent(new CustomEvent('companion:action', {
+            detail: JSON.parse(event.newValue),
+          }))
+        } catch {
+          setError('Could not read a companion update from another tab')
+        }
+      }
+    }
+
+    window.addEventListener('companion:action', onAction)
+    window.addEventListener('companion:devices-changed', onDeviceChange)
+    window.addEventListener('storage', onStorage)
+    startPolling()
+    return () => {
+      stopped = true
+      stopPolling()
+      window.removeEventListener('companion:action', onAction)
+      window.removeEventListener('companion:devices-changed', onDeviceChange)
+      window.removeEventListener('storage', onStorage)
+    }
+  }, [isAuthenticated, loadHabits])
 
   const addHabit = useCallback(
     async (formData) => {

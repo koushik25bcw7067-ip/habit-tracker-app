@@ -1,0 +1,62 @@
+:root {
+  --color-primary: #6366f1;
+  --color-secondary: #8b5cf6;
+  --color-background: #f8fafc;
+  --color-surface: #ffffff;
+  --color-text: #1e293b;
+  --color-accent: #f59e0b;
+  --theme-font: system-ui, sans-serif;
+}
+
+html,
+body {
+  font-family: var(--theme-font);
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text);
+  transition:
+    background-color 250ms ease,
+    color 250ms ease;
+}
+
+[data-theme] {
+  color: var(--color-text);
+}
+
+.theme-surface {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  transition: background-color 250ms ease;
+}
+
+.theme-button {
+  background-color: var(--color-primary);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.theme-button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.theme-accent {
+  color: var(--color-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

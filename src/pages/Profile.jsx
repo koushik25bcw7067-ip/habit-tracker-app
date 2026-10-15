@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import Icon from '../components/ui/Icon'
 import PageHeader from '../components/PageHeader'
@@ -10,6 +10,12 @@ import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 import { updateMe } from '../api/auth'
 import { getDashboard } from '../api/dashboard'
+import {
+  createCompanionPairingCode,
+  emitCompanionDevicesChanged,
+  listCompanionDevices,
+  revokeCompanionDevice,
+} from '../api/companion'
 import { ApiError } from '../api/client'
 
 const TOGGLES = [
@@ -28,12 +34,56 @@ export default function Profile() {
   const [saving, setSaving] = useState(false)
   const [saveMsg, setSaveMsg] = useState('')
   const [streak, setStreak] = useState(null)
+  const [devices, setDevices] = useState([])
+  const [pairing, setPairing] = useState(null)
+  const [deviceBusy, setDeviceBusy] = useState(false)
+  const [deviceMsg, setDeviceMsg] = useState('')
 
   useEffect(() => {
     getDashboard()
       .then((d) => setStreak(d.current_overall_streak))
       .catch(() => setStreak(null))
   }, [])
+
+  const loadDevices = useCallback(async () => {
+    try {
+      setDevices(await listCompanionDevices())
+      setDeviceMsg('')
+    } catch (err) {
+      setDeviceMsg(err instanceof ApiError ? err.message : 'Could not load companion devices.')
+    }
+  }, [])
+
+  useEffect(() => {
+    loadDevices()
+  }, [loadDevices])
+
+  useEffect(() => {
+    if (!pairing) return undefined
+    const checkPairing = async () => {
+      if (Date.now() >= new Date(pairing.expires_at).getTime()) {
+        setPairing(null)
+        setDeviceMsg('Pairing code expired. Generate a new one.')
+        return
+      }
+      try {
+        const currentDevices = await listCompanionDevices()
+        setDevices(currentDevices)
+        const pairedDevice = currentDevices.find(
+          (device) => device.id === pairing.device_id && device.paired_at,
+        )
+        if (pairedDevice) {
+          setPairing(null)
+          setDeviceMsg(`${pairedDevice.name} connected.`)
+          emitCompanionDevicesChanged()
+        }
+      } catch (err) {
+        setDeviceMsg(err instanceof ApiError ? err.message : 'Could not check device pairing status.')
+      }
+    }
+    const interval = window.setInterval(checkPairing, 3000)
+    return () => window.clearInterval(interval)
+  }, [pairing])
 
   function toggle(id) {
     setToggles((t) => ({ ...t, [id]: !t[id] }))
@@ -49,6 +99,38 @@ export default function Profile() {
       setSaveMsg(err instanceof ApiError ? err.message : 'Could not save changes.')
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function handlePairDevice() {
+    setDeviceBusy(true)
+    setDeviceMsg('')
+    setPairing(null)
+    try {
+      const result = await createCompanionPairingCode('Habit Companion')
+      setPairing(result)
+      await loadDevices()
+      emitCompanionDevicesChanged()
+    } catch (err) {
+      setDeviceMsg(err instanceof ApiError ? err.message : 'Could not create a pairing code.')
+    } finally {
+      setDeviceBusy(false)
+    }
+  }
+
+  async function handleRevokeDevice(device) {
+    if (!window.confirm(`Disconnect ${device.name}? The device will stop accessing your account.`)) return
+    setDeviceBusy(true)
+    setDeviceMsg('')
+    try {
+      await revokeCompanionDevice(device.id)
+      setPairing(null)
+      await loadDevices()
+      emitCompanionDevicesChanged()
+    } catch (err) {
+      setDeviceMsg(err instanceof ApiError ? err.message : 'Could not disconnect this device.')
+    } finally {
+      setDeviceBusy(false)
     }
   }
 
@@ -154,9 +236,47 @@ export default function Profile() {
           <span className="text-body-md text-on-surface">FastAPI Backend</span>
           <Chip tone="tertiary">Connected</Chip>
         </div>
-        <div className="flex items-center justify-between py-2.5">
-          <span className="text-body-md text-on-surface">ESP32 Habit Device</span>
-          <Chip tone="neutral">Not connected · future phase</Chip>
+        <div className="flex flex-col gap-3 py-2.5">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-body-md text-on-surface">ESP32 Habit Companion</span>
+            <Button variant="outline" onClick={handlePairDevice} disabled={deviceBusy}>
+              {deviceBusy ? 'Please wait…' : 'Pair device'}
+            </Button>
+          </div>
+          <p className="text-body-sm text-on-surface-variant">
+            Pair using a short-lived code. The device gets its own revocable credential; your website password and login tokens are never placed on it.
+          </p>
+          {pairing && (
+            <div className="rounded-lg bg-surface-container-low p-3" role="status">
+              <p className="text-body-sm text-on-surface-variant">Enter this code on your device within 5 minutes:</p>
+              <p className="font-mono text-headline-sm tracking-[0.2em] text-on-surface" aria-label="Device pairing code">
+                {pairing.pairing_code}
+              </p>
+              <p className="text-body-sm text-on-surface-variant">
+                Expires {new Date(pairing.expires_at).toLocaleTimeString()}.
+              </p>
+            </div>
+          )}
+          {deviceMsg && <p className="text-body-sm text-error" role="alert">{deviceMsg}</p>}
+          {devices.map((device) => (
+            <div key={device.id} className="flex items-center justify-between gap-3 border-t border-surface-container-high pt-3">
+              <div className="min-w-0">
+                <p className="text-body-md text-on-surface truncate">{device.name}</p>
+                <p className="text-body-sm text-on-surface-variant">
+                  {device.revoked_at
+                    ? 'Disconnected'
+                    : device.paired_at
+                      ? `Connected${device.last_seen_at ? ` · Active ${new Date(device.last_seen_at).toLocaleString()}` : ''}`
+                      : 'Waiting for pairing'}
+                </p>
+              </div>
+              {!device.revoked_at && (
+                <Button variant="danger" onClick={() => handleRevokeDevice(device)} disabled={deviceBusy}>
+                  Disconnect
+                </Button>
+              )}
+            </div>
+          ))}
         </div>
       </div>
 

@@ -84,6 +84,22 @@ export default function Tasks() {
 
   useEffect(() => {
     load()
+    const refreshAfterCompanionAction = (event) => {
+      if (event.detail?.action_type?.endsWith('_task')) load()
+    }
+    window.addEventListener('companion:action', refreshAfterCompanionAction)
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === 'visible') load()
+    }
+    window.addEventListener('focus', refreshWhenVisible)
+    document.addEventListener('visibilitychange', refreshWhenVisible)
+    const interval = window.setInterval(refreshWhenVisible, 30_000)
+    return () => {
+      window.removeEventListener('focus', refreshWhenVisible)
+      document.removeEventListener('visibilitychange', refreshWhenVisible)
+      window.removeEventListener('companion:action', refreshAfterCompanionAction)
+      window.clearInterval(interval)
+    }
   }, [load])
 
   const filtered = useMemo(() => {
