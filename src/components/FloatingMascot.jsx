@@ -9,11 +9,10 @@ import { listTasks } from '../api/tasks'
 import { onCompanion } from '../theme/companionBus'
 import { pickLine, pageLine } from '../theme/dialogue'
 import { isPendingToday, todayLocalISO } from '../theme/habitUtils'
+import { useVoiceCompanion } from '../hooks/useVoiceCompanion'
 
 // ---------------------------------------------------------------------------
-// The companion: ONE component, mounted once in App, visible on every route (login and register
-// included). It is docked in the bottom-right corner (above the mobile nav), can be minimised,
-// and never roams over the page unless the user opts in ("stroll" along the bottom edge).
+// The companion: ONE component, mounted once in App and visible on every route.
 //
 // It speaks only when something meaningful happens (events from companionBus, opening a page,
 // a gentle nudge about overdue work) and obeys cooldowns — there is no random chatter timer.
@@ -29,7 +28,6 @@ const FORM_ROUTE = /^\/habits\/(new|\d+\/edit)/
 const UNSOLICITED_COOLDOWN = 25_000
 const PAGE_LINE_COOLDOWN = 180_000
 const NUDGE_COOLDOWN = 600_000
-const DOCK_W = 64
 const SIZES = { normal: { w: 64, h: 78 }, compact: { w: 44, h: 54 } }
 
 const MOOD_FOR_EVENT = { celebrating: 'celebrating', happy: 'happy', encourage: 'encourage', thinking: 'thinking', speaking: 'speaking' }
@@ -47,9 +45,10 @@ export default function FloatingMascot() {
   const [panelOpen, setPanelOpen] = useState(false)
   const [panelLine, setPanelLine] = useState('')
   const [walking, setWalking] = useState(false)
-  const [offset, setOffset] = useState(0) // stroll offset in px (moves left from the dock)
+  const [roamPosition, setRoamPosition] = useState(null)
   const [facing, setFacing] = useState(1)
   const [bubbleShift, setBubbleShift] = useState(0)
+  const [voiceExchange, setVoiceExchange] = useState(null)
 
   const recent = useRef([])
   const lastSpoke = useRef(0)
@@ -60,6 +59,7 @@ export default function FloatingMascot() {
   const pageSeen = useRef({})
   const lastNudge = useRef(Date.now())
   const encouragedDay = useRef('')
+  const roamPositionRef = useRef(null)
 
   // Always-fresh data for long-lived callbacks.
   const data = useRef({})
@@ -68,6 +68,21 @@ export default function FloatingMascot() {
   const compact = FORM_ROUTE.test(pathname)
   const size = compact ? SIZES.compact : SIZES.normal
   const reduceMotion = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  roamPositionRef.current = roamPosition
+
+  const { recording, processing: voiceBusy, speaking, error: voiceError, handleRecording } =
+    useVoiceCompanion({
+      onResult: (result) => {
+        setVoiceExchange({ transcript: result.transcript, reply: result.reply })
+        setPanelLine(result.reply)
+      },
+    })
+
+  useEffect(() => {
+    if (speaking) setMood('speaking')
+    else if (recording || voiceBusy) setMood('thinking')
+    else setMood('idle')
+  }, [speaking, recording, voiceBusy])
 
   // ---- tasks ------------------------------------------------------------------------
   useEffect(() => {
@@ -252,30 +267,37 @@ export default function FloatingMascot() {
   useEffect(() => {
     if (!companion.roam || reduceMotion || companion.minimized || panelOpen || compact) {
       setWalking(false)
-      if (companion.roam === false || panelOpen) setOffset(0)
+      setRoamPosition(null)
       return undefined
     }
+    let startId
     let id
     const step = () => {
       if (!bubble) {
-        const max = Math.max(0, window.innerWidth - DOCK_W - 40)
-        setOffset((prev) => {
-          const next = Math.round(Math.random() * max)
-          setFacing(next > prev ? -1 : 1) // offset grows to the left
-          return next
-        })
+        const minX = window.innerWidth >= 768 ? 272 : 8
+        const maxX = Math.max(minX, window.innerWidth - size.w - 8)
+        const minY = 72
+        const maxY = Math.max(minY, window.innerHeight - size.h - (isAuthenticated ? 96 : 12))
+        const next = {
+          x: Math.round(minX + Math.random() * (maxX - minX)),
+          y: Math.round(minY + Math.random() * (maxY - minY)),
+        }
+        const previous = roamPositionRef.current
+        setFacing(previous && next.x < previous.x ? -1 : 1)
+        setRoamPosition(next)
         setWalking(true)
         clearTimeout(timers.current.walk)
-        timers.current.walk = setTimeout(() => setWalking(false), 4000)
+        timers.current.walk = setTimeout(() => setWalking(false), 2600)
       }
-      id = setTimeout(step, 9000 + Math.random() * 7000)
+      id = setTimeout(step, 6500 + Math.random() * 5000)
     }
-    id = setTimeout(step, 4000)
+    startId = setTimeout(step, 1400)
     return () => {
+      clearTimeout(startId)
       clearTimeout(id)
       clearTimeout(timers.current.walk)
     }
-  }, [companion.roam, companion.minimized, panelOpen, compact, reduceMotion, bubble])
+  }, [companion.roam, companion.minimized, panelOpen, compact, reduceMotion, bubble, size.w, size.h, isAuthenticated])
 
   useEffect(
     () => () => {
@@ -293,14 +315,16 @@ export default function FloatingMascot() {
       return
     }
     const r = el.getBoundingClientRect()
-    setBubbleShift(r.left < 8 ? 8 - r.left : 0)
-  }, [bubble, offset])
+    setBubbleShift(r.left < 8 ? 8 - r.left : r.right > window.innerWidth - 8 ? window.innerWidth - 8 - r.right : 0)
+  }, [bubble, roamPosition])
 
   // ---- panel ---------------------------------------------------------------------------
   const openPanel = useCallback(() => {
     setBubble(null)
     clearTimeout(timers.current.bubble)
-    setOffset(0)
+    setRoamPosition(null)
+    setVoiceExchange(null)
+    setMood('happy')
     const pool = data.current.world.lines
     const text = pickLine([...(pool.poke || []), ...(pool.idle || [])], getCtx(), recent.current)
     setPanelLine(text || '')
@@ -342,6 +366,10 @@ export default function FloatingMascot() {
   const dockPos = isAuthenticated
     ? 'bottom-[calc(4.75rem+env(safe-area-inset-bottom))] md:bottom-5 right-3 md:right-5'
     : 'bottom-4 right-3 md:right-5'
+  const wandering = companion.roam && !reduceMotion && !panelOpen && !compact
+  const roamingStyle = wandering && roamPosition
+    ? { left: `${roamPosition.x}px`, top: `${roamPosition.y}px`, right: 'auto', bottom: 'auto', transition: 'left 2.5s ease-in-out, top 2.5s ease-in-out' }
+    : undefined
 
   if (companion.minimized) {
     return (
@@ -367,10 +395,10 @@ export default function FloatingMascot() {
   ]
 
   return (
-    <div className={`fixed z-40 ${dockPos} pointer-events-none`} data-companion>
+    <div className={`fixed z-40 ${wandering && roamPosition ? '' : dockPos} pointer-events-none`} style={roamingStyle} data-companion>
       <div
         className="companion-dock relative pointer-events-none"
-        style={{ transform: `translateX(${-offset}px)`, width: size.w, height: size.h }}
+        style={{ width: size.w, height: size.h }}
       >
         {bubble && !panelOpen && (
           <div
@@ -391,7 +419,7 @@ export default function FloatingMascot() {
             ref={panelRef}
             role="dialog"
             aria-label={`${world.mascot.name} companion panel`}
-            className="companion-panel pointer-events-auto absolute right-0 bottom-full mb-2 w-[min(300px,calc(100vw-24px))] rounded-xl bg-surface-container-lowest text-on-surface border border-primary/40 shadow-popover p-3.5 flex flex-col gap-3"
+            className={`companion-panel pointer-events-auto absolute ${roamPosition && roamPosition.x < window.innerWidth / 2 ? 'left-0' : 'right-0'} bottom-full mb-2 w-[min(300px,calc(100vw-24px))] rounded-xl bg-surface-container-lowest text-on-surface border border-primary/40 shadow-popover p-3.5 flex flex-col gap-3`}
           >
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
@@ -421,7 +449,16 @@ export default function FloatingMascot() {
               </div>
             </div>
 
-            <p className="text-body-md text-on-surface bg-surface-container-low rounded-lg px-3 py-2.5">{panelLine}</p>
+            {voiceExchange ? (
+              <div className="flex flex-col gap-2">
+                <p className="text-body-sm text-on-surface-variant bg-surface-container-low rounded-lg px-3 py-2">
+                  <span className="font-semibold">You said:</span> {voiceExchange.transcript}
+                </p>
+                <p className="text-body-md text-on-surface bg-surface-container-low rounded-lg px-3 py-2.5">{voiceExchange.reply}</p>
+              </div>
+            ) : (
+              <p className="text-body-md text-on-surface bg-surface-container-low rounded-lg px-3 py-2.5">{panelLine}</p>
+            )}
 
             {isAuthenticated && (
               <>
@@ -430,6 +467,19 @@ export default function FloatingMascot() {
                   {' · '}
                   {ctx.overdueCount + ctx.dueCount} {t('tasks').toLowerCase()} due
                 </p>
+                <button
+                  type="button"
+                  onClick={handleRecording}
+                  disabled={voiceBusy && !recording}
+                  aria-pressed={recording}
+                  className={`pointer-events-auto min-h-[44px] rounded-lg px-3 py-2 text-label-md font-semibold flex items-center justify-center gap-2 transition-colors disabled:opacity-60 ${
+                    recording ? 'bg-error text-on-error' : 'bg-primary text-on-primary hover:bg-primary-strong'
+                  }`}
+                >
+                  <Icon name={recording ? 'stop' : 'mic'} size={18} />
+                  {recording ? 'Stop recording' : voiceBusy ? 'Thinking…' : 'Talk to me'}
+                </button>
+                {voiceError && <p role="alert" className="text-body-sm text-error">{voiceError}</p>}
                 <div className="grid grid-cols-2 gap-2">
                   {quick.map((q) => (
                     <button

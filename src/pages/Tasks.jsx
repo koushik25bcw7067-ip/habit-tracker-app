@@ -165,7 +165,7 @@ export default function Tasks() {
     <>
       <PageHeader
         title={t('tasks')}
-        subtitle="One-off to-dos — assignments, submissions, errands. Separate from your daily habits."
+        subtitle="One-off to-dos — assignments, submissions, errands. Separate from your recurring routines."
         action={
           <Button size="sm" onClick={() => setShowForm((s) => !s)}>
             <Icon name={showForm ? 'close' : 'add'} size={16} className="mr-1" />

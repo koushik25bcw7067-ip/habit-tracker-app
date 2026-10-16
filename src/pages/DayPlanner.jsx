@@ -120,7 +120,7 @@ export default function DayPlanner() {
           </h2>
 
           <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted">
-            Create a plan for your day and add tasks, habits, time slots,
+            Create a plan for your day and schedule one-off tasks, recurring routines, and time slots,
             priorities, and reminders.
           </p>
 
@@ -324,7 +324,7 @@ export default function DayPlanner() {
                     className="mt-2 w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm text-text outline-none focus:border-primary"
                   >
                     <option>Task</option>
-                    <option>Habit</option>
+                    <option>Routine</option>
                     <option>Personal</option>
                   </select>
                 </label>

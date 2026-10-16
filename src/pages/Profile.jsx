@@ -19,11 +19,32 @@ import {
 import { ApiError } from '../api/client'
 
 const TOGGLES = [
-  { id: 'reminders', label: 'Daily habit reminders', desc: 'Nudge notifications for scheduled habits', icon: 'notifications' },
+  { id: 'reminders', label: 'Daily routine reminders', desc: 'Nudge notifications for scheduled routines', icon: 'notifications' },
   { id: 'ai', label: 'AI adaptive insights', desc: 'Personalized recommendations based on your logs', icon: 'auto_awesome' },
   { id: 'weekly', label: 'Weekly report email', desc: 'A summary of your progress every Sunday', icon: 'mail' },
-  { id: 'sound', label: 'Completion sound', desc: 'Play a sound when a habit is marked done', icon: 'volume_up' },
+  { id: 'sound', label: 'Completion sound', desc: 'Play a sound when a routine is marked done', icon: 'volume_up' },
 ]
+
+function PreferenceSwitch({ checked, label, onChange }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-label={label}
+      aria-checked={checked}
+      onClick={onChange}
+      className={`relative h-7 w-12 flex-shrink-0 rounded-full border border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
+        checked ? 'bg-primary' : 'bg-outline-variant'
+      }`}
+    >
+      <span
+        className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
+          checked ? 'translate-x-5' : 'translate-x-0'
+        }`}
+      />
+    </button>
+  )
+}
 
 export default function Profile() {
   const { user, logout } = useAuth()
@@ -107,7 +128,7 @@ export default function Profile() {
     setDeviceMsg('')
     setPairing(null)
     try {
-      const result = await createCompanionPairingCode('Habit Companion')
+      const result = await createCompanionPairingCode('Routine Companion')
       setPairing(result)
       await loadDevices()
       emitCompanionDevicesChanged()
@@ -163,18 +184,17 @@ export default function Profile() {
         <div className="flex flex-col gap-2 border-t border-surface-container-high pt-3">
           {[
             ['enabled', 'Show companion'],
-            ['roam', 'Let it stroll along the bottom'],
+            ['roam', 'Let the companion wander around the page'],
             ['minimized', 'Keep it minimised'],
           ].map(([k, label]) => (
-            <label key={k} className="flex items-center justify-between gap-3 text-body-md text-on-surface min-h-[44px]">
+            <div key={k} className="flex items-center justify-between gap-3 text-body-md text-on-surface min-h-[48px]">
               <span>{label}</span>
-              <input
-                type="checkbox"
-                className="w-5 h-5 accent-primary"
+              <PreferenceSwitch
+                label={label}
                 checked={!!companion[k]}
-                onChange={(e) => setCompanion({ [k]: e.target.checked })}
+                onChange={() => setCompanion({ [k]: !companion[k] })}
               />
-            </label>
+            </div>
           ))}
           <label className="flex items-center justify-between gap-3 text-body-md text-on-surface min-h-[44px]">
             <span>Chatter</span>
@@ -210,22 +230,17 @@ export default function Profile() {
         <h3 className="font-display text-headline-sm text-on-surface mb-1">Notifications & AI</h3>
         <p className="text-body-sm text-on-surface-variant mb-2">Local preferences — the backend doesn't yet store these server-side.</p>
         {TOGGLES.map((t) => (
-          <div key={t.id} className="flex items-center justify-between py-2.5 border-b border-surface-container-high last:border-0">
+          <div key={t.id} className="flex items-center justify-between gap-4 py-3 border-b border-surface-container-high last:border-0">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="w-8 h-8 rounded-lg bg-surface-container-low flex items-center justify-center flex-shrink-0">
-                <Icon name={t.icon} size={16} className="text-on-surface-variant" />
+              <div className="w-10 h-10 rounded-xl bg-surface-container-low flex items-center justify-center flex-shrink-0">
+                <Icon name={t.icon} size={18} className="text-primary" />
               </div>
               <div className="min-w-0">
-                <div className="text-body-md font-medium text-on-surface truncate">{t.label}</div>
-                <div className="text-body-sm text-on-surface-variant truncate">{t.desc}</div>
+                <div className="text-body-md font-semibold text-on-surface">{t.label}</div>
+                <div className="text-body-sm text-on-surface-variant">{t.desc}</div>
               </div>
             </div>
-            <button
-              onClick={() => toggle(t.id)}
-              className={`w-11 h-6 rounded-full transition-colors relative flex-shrink-0 ${toggles[t.id] ? 'bg-tertiary' : 'bg-outline-variant'}`}
-            >
-              <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${toggles[t.id] ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
-            </button>
+            <PreferenceSwitch label={t.label} checked={!!toggles[t.id]} onChange={() => toggle(t.id)} />
           </div>
         ))}
       </div>
@@ -238,7 +253,7 @@ export default function Profile() {
         </div>
         <div className="flex flex-col gap-3 py-2.5">
           <div className="flex items-center justify-between gap-3">
-            <span className="text-body-md text-on-surface">ESP32 Habit Companion</span>
+            <span className="text-body-md text-on-surface">ESP32 Routine Companion</span>
             <Button variant="outline" onClick={handlePairDevice} disabled={deviceBusy}>
               {deviceBusy ? 'Please wait…' : 'Pair device'}
             </Button>

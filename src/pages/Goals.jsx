@@ -180,7 +180,7 @@ export default function Goals() {
     <>
       <PageHeader
         title={t('goals')}
-        subtitle="Bigger personal targets — separate from your daily habits"
+        subtitle="Bigger personal targets — separate from your recurring routines"
         action={
           <Button size="sm" onClick={() => setShowForm((s) => !s)}>
             <Icon name={showForm ? 'close' : 'add'} size={16} className="mr-1" />

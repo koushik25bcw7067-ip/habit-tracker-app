@@ -31,7 +31,7 @@ export default function Recommendations() {
           <Icon name="auto_awesome" size={13} /> CIRCADIAN ENGINE V2.4
         </span>
         <h1 className="font-display text-headline-lg mt-2">Personalized for you ✨</h1>
-        <p className="text-body-md mt-1 text-on-primary/90">Actionable habit adjustments calculated from your circadian pattern and exam schedule.</p>
+        <p className="text-body-md mt-1 text-on-primary/90">Actionable routine adjustments calculated from your circadian pattern and exam schedule.</p>
         <div className="flex items-center gap-2 mt-3">
           <span className="px-2.5 py-1 rounded-full bg-on-primary/15 text-label-sm font-semibold flex items-center gap-1">
             <Icon name="trending_up" size={13} /> {pendingCount} Pending
@@ -62,7 +62,7 @@ export default function Recommendations() {
         ) : error ? (
           <ErrorState description={error} onRetry={refresh} />
         ) : filtered.length === 0 ? (
-          <EmptyState icon="auto_awesome" title="Nothing here yet" description="Check back after your next habit-logging cycle." />
+          <EmptyState icon="auto_awesome" title="Nothing here yet" description="Check back after your next routine check-in." />
         ) : (
           filtered.map((r) => (
             <RecommendationCard

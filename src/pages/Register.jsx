@@ -54,7 +54,7 @@ export default function Register() {
         </div>
         <h1 className="mt-4 font-display text-headline-lg text-on-surface text-center">Create your account</h1>
         <p className="mt-1.5 text-body-md text-on-surface-variant text-center">
-          Start building unstoppable momentum, one habit at a time.
+          Start building unstoppable momentum, one routine at a time.
         </p>
 
         <div className="w-full mt-6 flex rounded-md bg-surface-container-low p-1">

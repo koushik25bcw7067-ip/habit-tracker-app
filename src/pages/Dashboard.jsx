@@ -207,7 +207,7 @@ export default function Dashboard() {
         <div className="flex items-center justify-between bg-surface-container-low rounded-md px-3 py-2 text-body-sm">
           <span className="flex items-center gap-1.5 text-on-surface-variant">
             <Icon name="check_circle" size={16} className="text-tertiary" />
-            {dash.monthly_statistics?.total_completions ?? 0} habits completed this month
+            {dash.monthly_statistics?.total_completions ?? 0} routines completed this month
           </span>
         </div>
       </section>
@@ -219,12 +219,12 @@ export default function Dashboard() {
       <section className="flex flex-col gap-3">
         <div className="flex items-center justify-between gap-2">
           <div>
-            <h2 className="font-display text-headline-md text-on-surface">Today's Habits</h2>
+            <h2 className="font-display text-headline-md text-on-surface">Today's Routines</h2>
           </div>
           <Link to="/habits/new">
             <Button size="sm" icon="add">
               <Icon name="add" size={16} className="mr-1" />
-              Habit
+              Routine
             </Button>
           </Link>
         </div>
@@ -253,9 +253,9 @@ export default function Dashboard() {
 
         <div className="flex flex-col gap-2.5">
           {habitsLoading && habits.length === 0 ? (
-            <LoadingState label="Loading habits…" />
+            <LoadingState label="Loading routines…" />
           ) : today.length === 0 ? (
-            <EmptyState icon="task_alt" title="No habits for this filter" description="Try another filter or add a new habit." />
+            <EmptyState icon="task_alt" title="No routines for this filter" description="Try another filter or add a new routine." />
           ) : (
             today.map((h) => <DashboardHabitRow key={h.id} habit={h} onToggle={handleToggle} />)
           )}
@@ -331,7 +331,7 @@ export default function Dashboard() {
                   <Icon name="check" size={18} className="text-tertiary-strong" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-body-md font-semibold text-on-surface truncate">{habit?.name || `Habit #${a.habit_id}`}</div>
+                  <div className="text-body-md font-semibold text-on-surface truncate">{habit?.name || `Routine #${a.habit_id}`}</div>
                   <div className="text-body-sm text-on-surface-variant truncate">
                     Completed{a.actual_value != null ? ` · ${a.actual_value}${habit?.unit ? ` ${habit.unit}` : ''}` : ''}
                   </div>

@@ -117,7 +117,7 @@ export default function MascotDoll({ mascot, secondary = '#F59E0B', mood = 'idle
       height="100%"
       aria-hidden="true"
       focusable="false"
-      className={`mascot-svg ${walking ? 'is-walking' : ''}`}
+      className={`mascot-svg ${walking ? 'is-walking' : 'is-idle'}`}
       style={{ overflow: 'visible' }}
     >
       <ellipse cx="40" cy="90" rx="20" ry="4" fill="rgba(0,0,0,0.18)" />
@@ -125,6 +125,12 @@ export default function MascotDoll({ mascot, secondary = '#F59E0B', mood = 'idle
       <g className="mascot-body-group">
         {accessory === 'cape' && (
           <path d="M26 52 Q40 48 54 52 L62 84 Q40 92 18 84 Z" fill={outfitDark} className="mascot-cape" />
+        )}
+        {accessory === 'cap' && (
+          <g>
+            <path d="M51 53 Q65 53 65 68 L59 74 L52 68 Z" fill={outfitDark} stroke={tintc(outfitDark, 0.15)} strokeWidth="1.5" />
+            <path d="M57 58 L60 58 L60 69 L57 69 Z" fill={tintc(outfit, 0.35)} />
+          </g>
         )}
 
         {/* legs */}
@@ -151,7 +157,12 @@ export default function MascotDoll({ mascot, secondary = '#F59E0B', mood = 'idle
         <circle cx="40" cy="68" r="2.6" fill={tintc(outfit, 0.45)} opacity="0.8" />
 
         {/* head */}
+        <g fill="#5B3826">
+          <circle cx="17" cy="27" r="8" />
+          <circle cx="63" cy="27" r="8" />
+        </g>
         <circle cx="40" cy="32" r="25" fill={skin} />
+        <path d="M17 25 Q17 5 40 6 Q63 7 63 25 Q57 19 51 18 Q44 25 38 19 Q29 25 22 20 Z" fill="#5B3826" />
         <ellipse cx="24" cy="42" rx="4.6" ry="3" fill="#FB7185" opacity="0.45" />
         <ellipse cx="56" cy="42" rx="4.6" ry="3" fill="#FB7185" opacity="0.45" />
 

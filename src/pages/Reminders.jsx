@@ -44,7 +44,7 @@ export default function Reminders() {
   }, [load])
 
   function habitName(id) {
-    return habits.find((h) => h.id === id)?.name || 'Unknown habit'
+    return habits.find((h) => h.id === id)?.name || 'Unknown routine'
   }
 
   function set(field, value) {
@@ -77,7 +77,7 @@ export default function Reminders() {
   async function handleSubmit(e) {
     e.preventDefault()
     if (!form.habit_id) {
-      setFormError('Pick a habit')
+      setFormError('Pick a routine')
       return
     }
     const reminder_time = parseReminderTime(form.time)
@@ -125,7 +125,7 @@ export default function Reminders() {
     <>
       <PageHeader
         title={t('reminders')}
-        subtitle="Get nudged at the right time for habits that matter"
+        subtitle="Get nudged at the right time for routines that matter"
         action={
           <Button size="sm" onClick={showForm ? () => setShowForm(false) : startCreate} disabled={habits.length === 0}>
             <Icon name={showForm ? 'close' : 'add'} size={16} className="mr-1" />
@@ -135,13 +135,13 @@ export default function Reminders() {
       />
 
       {habits.length === 0 && !showForm && (
-        <Card className="p-4 text-body-sm text-on-surface-variant">Add a habit first — reminders are attached to a habit.</Card>
+        <Card className="p-4 text-body-sm text-on-surface-variant">Add a routine first — reminders are attached to a routine.</Card>
       )}
 
       {showForm && (
         <Card className="p-4">
           <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-            <Field label="Habit" required>
+            <Field label="Routine" required>
               <Select value={form.habit_id} onChange={(e) => set('habit_id', e.target.value)}>
                 {habits.map((h) => (
                   <option key={h.id} value={h.id}>{h.name}</option>

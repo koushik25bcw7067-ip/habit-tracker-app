@@ -94,7 +94,7 @@ export default function AiReport() {
 
   return (
     <>
-      <PageHeader title="AI Report" subtitle="Generated from your verified habit logs and completion patterns" />
+      <PageHeader title="AI Report" subtitle="Generated from your verified routine logs and completion patterns" />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <SummaryCard
@@ -142,7 +142,7 @@ export default function AiReport() {
       )}
 
       <div className="bg-gradient-to-br from-secondary-fixed/50 to-primary-fixed/50 rounded-xl p-4 flex flex-col gap-3">
-        <h3 className="font-display text-headline-sm text-on-surface">New Habit Suggestions</h3>
+        <h3 className="font-display text-headline-sm text-on-surface">New Routine Suggestions</h3>
         <form onSubmit={handleSuggest} className="flex items-center gap-2">
           <Input placeholder="What's a goal you're working toward?" value={goal} onChange={(e) => setGoal(e.target.value)} className="bg-surface-container-lowest/80" />
           <Button type="submit" size="md" disabled={suggesting || goal.trim().length < 3}>

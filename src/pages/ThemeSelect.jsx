@@ -16,6 +16,7 @@ const SAMPLE_CUSTOM = [
   'A peaceful celestial world with a tiny moon spirit and lavender colours',
   'Epic royal kingdom of gold and dark stone',
   'Cyberpunk rooftop at night, neon pink and blue',
+  'Attack on Titan-inspired military expedition world: dark stone, forest olive, muted crimson and parchment maps',
 ]
 
 function WorldCard({ k, raw, active, previewing, onPreview }) {
@@ -229,7 +230,7 @@ export default function ThemeSelect() {
             )}
           </div>
           <p className="text-body-md text-on-surface-variant">
-            Every world changes the colours, fonts, wording and your little companion across the whole app. Your habits and data never change.
+            Every world changes the colours, fonts, wording and your little companion across the whole app. Your routines and data never change.
           </p>
         </div>
 

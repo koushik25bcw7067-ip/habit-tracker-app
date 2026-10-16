@@ -77,7 +77,7 @@ export default function MyHabits() {
             <Icon name="auto_awesome" size={16} className="text-primary" />
           </div>
           <p className="text-body-sm text-on-surface">
-            <span className="font-semibold">{topHabit.name}</span> is your top habit at {topHabit.completion}%
+            <span className="font-semibold">{topHabit.name}</span> is your top routine at {topHabit.completion}%
             completion — keep the streak alive today.
           </p>
         </div>
@@ -85,7 +85,7 @@ export default function MyHabits() {
 
       <div className="relative">
         <Icon name="search" size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant" />
-        <Input placeholder="Search habits by title or tag…" className="pl-10" value={search} onChange={(e) => setSearch(e.target.value)} />
+        <Input placeholder="Search routines by title or tag…" className="pl-10" value={search} onChange={(e) => setSearch(e.target.value)} />
       </div>
 
       <div className="flex items-center gap-2 overflow-x-auto pb-1">
@@ -127,19 +127,19 @@ export default function MyHabits() {
 
       <div className="flex flex-col gap-3">
         {loading && habits.length === 0 ? (
-          <LoadingState label="Loading your habits…" />
+          <LoadingState label="Loading your routines…" />
         ) : error ? (
           <ErrorState description={error} onRetry={refresh} />
         ) : filtered.length === 0 ? (
           <EmptyState
             icon="checklist"
             title={t('empty_habits')}
-            description="Try adjusting your filters, or add your first habit to get started."
+            description="Try adjusting your filters, or add your first routine to get started."
             action={
               <Link to="/habits/new">
                 <Button icon="add">
                   <Icon name="add" size={16} className="mr-1.5" />
-                  Add Habit
+                  Add Routine
                 </Button>
               </Link>
             }

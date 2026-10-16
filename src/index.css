@@ -139,6 +139,8 @@
 .mascot-svg.is-walking .mascot-arm-l { animation: mascot-swing 0.42s ease-in-out infinite; }
 .mascot-svg.is-walking .mascot-arm-r { animation: mascot-swing 0.42s ease-in-out infinite reverse; }
 .mascot-svg.is-walking .mascot-cape { animation: mascot-cape 0.42s ease-in-out infinite; }
+.mascot-svg.is-idle .mascot-body-group { animation: mascot-idle 2.8s ease-in-out infinite; transform-origin: 50% 80%; }
+.mascot-svg.is-idle .mascot-arm-l { animation: mascot-idle-arm 3.4s ease-in-out infinite alternate; }
 .mascot-svg .mascot-arm-l.is-cheer { animation: mascot-cheer-l 0.45s ease-in-out infinite alternate; }
 .mascot-svg .mascot-arm-r.is-cheer { animation: mascot-cheer-r 0.45s ease-in-out infinite alternate; }
 .mascot-svg .mascot-eyes { animation: mascot-blink 4.2s infinite; }
@@ -152,6 +154,8 @@
 @keyframes mascot-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
 @keyframes mascot-swing { 0%, 100% { transform: rotate(14deg); } 50% { transform: rotate(-14deg); } }
 @keyframes mascot-cape { 0%, 100% { transform: skewX(-4deg); } 50% { transform: skewX(6deg); } }
+@keyframes mascot-idle { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-1.8px) rotate(-1deg); } }
+@keyframes mascot-idle-arm { from { transform: rotate(-2deg); } to { transform: rotate(5deg); } }
 @keyframes mascot-cheer-l { from { transform: rotate(0deg); } to { transform: rotate(-150deg); } }
 @keyframes mascot-cheer-r { from { transform: rotate(0deg); } to { transform: rotate(150deg); } }
 @keyframes mascot-blink { 0%, 93%, 100% { transform: scaleY(1); } 96% { transform: scaleY(0.1); } }

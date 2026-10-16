@@ -50,11 +50,11 @@ export default function Login() {
         </div>
 
         <span className="mt-4 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container text-primary text-label-sm font-semibold">
-          <Icon name="auto_awesome" size={13} /> CAMPUS HABIT INTELLIGENCE
+          <Icon name="auto_awesome" size={13} /> CAMPUS ROUTINE INTELLIGENCE
         </span>
         <h1 className="mt-3 font-display text-headline-lg text-on-surface text-center">Mini AI Companion</h1>
         <p className="mt-1.5 text-body-md text-on-surface-variant text-center">
-          Build better habits. Understand yourself. Grow every day.
+          Build better routines. Understand yourself. Grow every day.
         </p>
 
         <div className="w-full mt-6 flex rounded-md bg-surface-container-low p-1">

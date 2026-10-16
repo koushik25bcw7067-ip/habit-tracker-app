@@ -16,8 +16,8 @@ export default function AddHabit() {
 
   return (
     <>
-      <PageHeader title={`Add ${t('habit')}`} subtitle="Define a new habit to track" />
-      <HabitForm onSubmit={handleSubmit} submitLabel="Create Habit" />
+      <PageHeader title={`Add ${t('habit')}`} subtitle="Set up a routine to track" />
+      <HabitForm onSubmit={handleSubmit} submitLabel="Create Routine" />
     </>
   )
 }

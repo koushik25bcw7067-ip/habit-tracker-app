@@ -23,8 +23,8 @@ export const LINE_KEYS = [
 
 // Neutral wording used whenever a world doesn't override a label. Functional meaning never changes.
 export const DEFAULT_VOCAB = {
-  habit: 'Habit',
-  habits: 'Habits',
+  habit: 'Routine',
+  habits: 'Routines',
   task: 'Task',
   tasks: 'Tasks',
   goal: 'Goal',
@@ -33,9 +33,9 @@ export const DEFAULT_VOCAB = {
   dashboard: 'Dashboard',
   achievements: 'Achievements',
   reminders: 'Reminders',
-  add_habit_prompt: 'What habit would you like to build?',
+  add_habit_prompt: 'What routine would you like to build?',
   add_task_prompt: 'What needs doing?',
-  empty_habits: 'No habits yet.',
+  empty_habits: 'No routines yet.',
   empty_tasks: 'Nothing pending.',
   greeting: 'Welcome back, {name}',
 }
@@ -45,8 +45,8 @@ const GENERIC_LINES = {
   idle: ['Still here, rooting for you.', 'One step at a time.'],
   poke: ['Hey! That tickles.', 'Need something?'],
   thinking: ['Let me think...'],
-  habit_created: ['New habit added. Let\'s make it stick!'],
-  habit_done: ['Habit done. Nicely done!'],
+  habit_created: ['New routine added. Let\'s make it stick!'],
+  habit_done: ['Routine done. Nicely done!'],
   habit_undone: ['No worries, we can redo it.'],
   task_created: ['Task added.'],
   task_done: ['Task complete!'],
@@ -65,7 +65,7 @@ export const CLASSIC_FALLBACK = {
   colors: { primary: '#4f46e5', secondary: '#674bb5', tertiary: '#10b981', background: '#f8f9ff', text: '#0b1c30' },
   fonts: { display: 'Plus Jakarta Sans', body: 'Inter' },
   effects: { texture: 'none', ambient: 'none', radius: 'soft', border: 'plain', heading_case: 'none', heading_tracking: -0.02 },
-  mascot: { name: 'Buddy', emoji: '✨', accessory: 'none', outfit: '#4f46e5', skin: '#fde0c4' },
+  mascot: { name: 'Mira', emoji: '🧭', accessory: 'cap', outfit: '#e8793f', skin: '#fde0c4' },
   vocab: { ...DEFAULT_VOCAB },
   lines: { ...GENERIC_LINES, pages: {} },
 }
@@ -79,6 +79,16 @@ function text(v, limit) {
   if (BAD.test(s)) return ''
   s = s.replace(/\{(\w+)\}/g, (m, k) => (ALLOWED_PH.has(k) ? m : ''))
   return s.slice(0, limit).trim()
+}
+
+function routineWording(value) {
+  return value.replace(/\bhabits?\b/gi, (word) => {
+    const replacement = word.toLowerCase().endsWith('s') ? 'routines' : 'routine'
+    if (word === word.toUpperCase()) return replacement.toUpperCase()
+    return word[0] === word[0].toUpperCase()
+      ? replacement[0].toUpperCase() + replacement.slice(1)
+      : replacement
+  })
 }
 const oneOf = (v, list, dflt) => (list.includes(v) ? v : dflt)
 
@@ -133,9 +143,9 @@ function normalizeStrict(raw) {
 
   const m = r.mascot || {}
   const mascot = {
-    name: text(m.name, 24) || 'Buddy',
-    emoji: text(m.emoji, 4) || '✨',
-    accessory: oneOf(m.accessory, ACCESSORIES, 'none'),
+    name: text(m.name, 24) || 'Mira',
+    emoji: text(m.emoji, 4) || '🧭',
+    accessory: oneOf(m.accessory, ACCESSORIES, 'cap'),
     outfit: normalizeHex(m.outfit) || colors.primary,
     skin: normalizeHex(m.skin) || '#fde0c4',
   }
@@ -145,22 +155,26 @@ function normalizeStrict(raw) {
     const v = text(r.vocab?.[k], 60)
     if (v) vocab[k] = v
   }
+  vocab.habit = DEFAULT_VOCAB.habit
+  vocab.habits = DEFAULT_VOCAB.habits
+  vocab.add_habit_prompt = DEFAULT_VOCAB.add_habit_prompt
+  vocab.empty_habits = DEFAULT_VOCAB.empty_habits
 
   const lines = {}
   for (const k of LINE_KEYS) {
-    const arr = Array.isArray(r.lines?.[k]) ? r.lines[k].map((x) => text(x, 110)).filter(Boolean).slice(0, 8) : []
+    const arr = Array.isArray(r.lines?.[k]) ? r.lines[k].map((x) => routineWording(text(x, 110))).filter(Boolean).slice(0, 8) : []
     lines[k] = arr.length ? arr : GENERIC_LINES[k]
   }
   lines.pages = {}
   for (const [k, v] of Object.entries(r.lines?.pages || {})) {
-    const t = text(v, 110)
+    const t = routineWording(text(v, 110))
     if (t && /^[a-z]+$/.test(k)) lines.pages[k] = t
   }
 
   return {
     key: typeof (r.preset_key ?? r.key) === 'string' ? String(r.preset_key ?? r.key).replace(/[^a-z0-9_-]/gi, '').slice(0, 40) : null,
     label: text(r.label, 40) || mascot.name,
-    description: text(r.description, 160),
+    description: routineWording(text(r.description, 160)),
     mode: r.mode === 'dark' ? 'dark' : 'light',
     colors,
     fonts: safeFonts(r.fonts || { display: r.font }),
@@ -168,7 +182,7 @@ function normalizeStrict(raw) {
     mascot,
     vocab,
     lines,
-    source: r.source === 'ai' || r.source === 'fallback' ? r.source : undefined,
+    source: r.source === 'ai' || r.source === 'fallback' || r.source === 'curated' ? r.source : undefined,
   }
 }
 
@@ -228,6 +242,6 @@ export const clearUserCache = (uid) => uid && write(cacheKey(uid), null)
 
 // ---- companion settings (per browser) ----------------------------------
 const COMP_KEY = 'mini_ai_companion'
-export const DEFAULT_COMPANION_SETTINGS = { enabled: true, minimized: false, roam: false, chatter: 'normal' }
+export const DEFAULT_COMPANION_SETTINGS = { enabled: true, minimized: false, roam: true, chatter: 'normal' }
 export const loadCompanionSettings = () => ({ ...DEFAULT_COMPANION_SETTINGS, ...(read(COMP_KEY) || {}) })
 export const saveCompanionSettings = (s) => write(COMP_KEY, s)

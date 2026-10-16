@@ -19,7 +19,7 @@ function todayLocalISO() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-export default function HabitForm({ initial, onSubmit, submitLabel = 'Save Habit' }) {
+export default function HabitForm({ initial, onSubmit, submitLabel = 'Save Routine' }) {
   const navigate = useNavigate()
   const { categories } = useHabits()
   const [form, setForm] = useState({
@@ -52,7 +52,7 @@ export default function HabitForm({ initial, onSubmit, submitLabel = 'Save Habit
 
   function validate() {
     const next = {}
-    if (!form.name.trim()) next.name = 'Habit name is required'
+    if (!form.name.trim()) next.name = 'Routine name is required'
     if (form.name.trim().length > 60) next.name = 'Keep it under 60 characters'
     if (!form.startDate) next.startDate = 'Start date is required'
     if (form.targetValue === '' || Number(form.targetValue) <= 0) next.targetValue = 'Enter a value greater than 0'
@@ -69,7 +69,7 @@ export default function HabitForm({ initial, onSubmit, submitLabel = 'Save Habit
     try {
       await onSubmit({ ...form, targetValue: Number(form.targetValue) })
     } catch (err) {
-      setSubmitError(err.message || 'Could not save this habit. Please try again.')
+      setSubmitError(err.message || 'Could not save this routine. Please try again.')
     } finally {
       setSubmitting(false)
     }
@@ -78,12 +78,12 @@ export default function HabitForm({ initial, onSubmit, submitLabel = 'Save Habit
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="bg-surface-container-lowest rounded-xl shadow-card-1 p-4 flex flex-col gap-4">
-        <Field label="Habit Name" required error={errors.name}>
+        <Field label="Routine Name" required error={errors.name}>
           <Input placeholder="e.g. Study DSA & LeetCode" value={form.name} onChange={(e) => set('name', e.target.value)} error={errors.name} maxLength={60} />
         </Field>
 
         <Field label="Description" hint="Add context, focus areas, or a specific target.">
-          <Textarea placeholder="What does success look like for this habit?" value={form.description} onChange={(e) => set('description', e.target.value)} />
+          <Textarea placeholder="What does success look like for this routine?" value={form.description} onChange={(e) => set('description', e.target.value)} />
         </Field>
 
         <div className="grid grid-cols-2 gap-3">

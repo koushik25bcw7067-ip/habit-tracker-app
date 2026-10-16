@@ -5,8 +5,8 @@ import { useTheme } from '../../context/ThemeContext'
 
 const PAGE_TITLES = {
   '/dashboard': 'Dashboard',
-  '/habits': 'Habits',
-  '/habits/new': 'New Habit',
+  '/habits': 'Routines',
+  '/habits/new': 'New Routine',
   '/tasks': 'Tasks',
   '/goals': 'Goals',
   '/calendar': 'Calendar',

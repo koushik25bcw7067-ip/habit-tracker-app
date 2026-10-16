@@ -26,8 +26,8 @@ export const LINE_KEYS = [
 ]
 
 export const DEFAULT_VOCAB = {
-  habit: 'Habit',
-  habits: 'Habits',
+  habit: 'Routine',
+  habits: 'Routines',
   task: 'Task',
   tasks: 'Tasks',
   goal: 'Goal',
@@ -36,9 +36,9 @@ export const DEFAULT_VOCAB = {
   dashboard: 'Dashboard',
   achievements: 'Achievements',
   reminders: 'Reminders',
-  add_habit_prompt: 'What habit would you like to build?',
+  add_habit_prompt: 'What routine would you like to build?',
   add_task_prompt: 'What needs doing?',
-  empty_habits: 'No habits yet.',
+  empty_habits: 'No routines yet.',
   empty_tasks: 'Nothing pending.',
   greeting: 'Welcome back, {name}',
 }
@@ -48,8 +48,8 @@ const GENERIC_LINES = {
   idle: ['Still here, rooting for you.', 'One step at a time.'],
   poke: ['Hey! That tickles.', 'Need something?'],
   thinking: ['Let me think...'],
-  habit_created: ["New habit added. Let's make it stick!"],
-  habit_done: ['Habit done. Nicely done!'],
+  habit_created: ["New routine added. Let's make it stick!"],
+  habit_done: ['Routine done. Nicely done!'],
   habit_undone: ['No worries, we can redo it.'],
   task_created: ['Task added.'],
   task_done: ['Task complete!'],

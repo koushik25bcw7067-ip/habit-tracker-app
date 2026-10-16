@@ -13,7 +13,7 @@ export default function EditHabit() {
   if (!habit) {
     // Still loading the habits list for the first time -> show a spinner
     // instead of bouncing straight back to /habits.
-    if (loading && habits.length === 0) return <LoadingState label="Loading habit…" />
+    if (loading && habits.length === 0) return <LoadingState label="Loading routine…" />
     return <Navigate to="/habits" replace />
   }
 
@@ -24,7 +24,7 @@ export default function EditHabit() {
 
   return (
     <>
-      <PageHeader title="Edit Habit" subtitle={habit.name} />
+      <PageHeader title="Edit Routine" subtitle={habit.name} />
       <HabitForm initial={habit} onSubmit={handleSubmit} submitLabel="Save Changes" />
     </>
   )

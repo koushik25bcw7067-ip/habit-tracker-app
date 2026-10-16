@@ -124,7 +124,7 @@ export default function CalendarPage() {
                 {parseISODateLocal(dayDetail.dateISO).toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}
               </h3>
               <p className="text-body-sm text-tertiary font-semibold">
-                {dayDetail.completed} of {dayDetail.planned} Habits Completed
+                {dayDetail.completed} of {dayDetail.planned} Routines Completed
               </p>
             </div>
             <div className="w-11 h-11 rounded-full border-2 border-tertiary flex items-center justify-center text-label-sm font-bold text-tertiary">
@@ -148,7 +148,7 @@ export default function CalendarPage() {
             </div>
           ) : (
             <p className="text-body-sm text-on-surface-variant">
-              Per-habit detail isn't available for this date (outside the 30-day statistics window).
+              Per-routine detail isn't available for this date (outside the 30-day statistics window).
             </p>
           )}
         </div>

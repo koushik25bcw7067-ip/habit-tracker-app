@@ -106,7 +106,7 @@ export default function Statistics() {
             </div>
             <div className="flex-1">
               <span className="font-display text-headline-sm text-on-surface">Average Consistency</span>
-              <p className="text-body-sm text-on-surface-variant">Average completion rate across your active habits</p>
+              <p className="text-body-sm text-on-surface-variant">Average completion rate across your active routines</p>
             </div>
           </div>
 
@@ -133,7 +133,7 @@ export default function Statistics() {
           {(topAnchors.length > 0 || needsAttention.length > 0) && (
             <div className="bg-surface-container-lowest rounded-xl shadow-card-1 p-4 flex flex-col gap-3">
               <div className="flex items-center justify-between">
-                <h3 className="font-display text-headline-sm text-on-surface">Habit Matrix</h3>
+                <h3 className="font-display text-headline-sm text-on-surface">Routine Matrix</h3>
                 <Chip tone="neutral">Active {habits.filter((h) => h.active).length}</Chip>
               </div>
               {topAnchors.length > 0 && (

@@ -6,7 +6,7 @@ import { useTheme } from '../../context/ThemeContext'
 
 const NAV_ITEMS = [
   { path: '/dashboard', label: 'Dashboard', vk: 'dashboard', icon: 'home' },
-  { path: '/habits', label: 'My Habits', vk: 'habits', icon: 'checklist' },
+  { path: '/habits', label: 'My Routines', vk: 'habits', icon: 'checklist' },
   { path: '/tasks', label: 'Tasks', vk: 'tasks', icon: 'task_alt' },
   { path: '/goals', label: 'Goals', vk: 'goals', icon: 'flag' },
   { path: '/calendar', label: 'Calendar', icon: 'calendar_month' },
