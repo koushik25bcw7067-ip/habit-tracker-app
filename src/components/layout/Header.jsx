@@ -12,18 +12,15 @@ const PAGE_TITLES = {
   '/calendar': 'Calendar',
   '/day-planner': 'Day Planner',
   '/statistics': 'Statistics',
-  '/recommendations': 'AI Recommendations',
-  '/report': 'AI Report',
-  '/companion': 'AI Companion',
-  '/reminders': 'Reminders',
-  '/achievements': 'Achievements',
+  '/ai': 'AI Hub',
+  '/progress': 'My Progress',
   '/profile': 'Profile',
 }
 
 export default function Header({ pathname }) {
   const { user } = useAuth()
   const { t } = useTheme()
-  const VK = { '/dashboard': 'dashboard', '/habits': 'habits', '/tasks': 'tasks', '/goals': 'goals', '/achievements': 'achievements', '/reminders': 'reminders' }
+  const VK = { '/dashboard': 'dashboard', '/habits': 'habits', '/tasks': 'tasks', '/goals': 'goals' }
   const hit = Object.entries(PAGE_TITLES).find(([p]) => pathname.startsWith(p))
   const title = hit ? (pathname.startsWith('/habits/new') ? hit[1] : VK[hit[0]] ? t(VK[hit[0]]) : hit[1]) : 'Mini AI'
 
@@ -41,7 +38,7 @@ export default function Header({ pathname }) {
         </div>
         <div className="flex items-center gap-space-sm flex-shrink-0">
           <Link
-            to="/reminders"
+            to="/progress?tab=reminders"
             aria-label="View reminders"
             className="w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-low transition-colors"
           >

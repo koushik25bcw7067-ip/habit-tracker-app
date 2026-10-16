@@ -17,12 +17,9 @@ import Tasks from './pages/Tasks'
 import Goals from './pages/Goals'
 import CalendarPage from './pages/CalendarPage'
 import Statistics from './pages/Statistics'
-import Recommendations from './pages/Recommendations'
-import AiReport from './pages/AiReport'
-import AiCompanion from './pages/AiCompanion'
 import DayPlanner from './pages/DayPlanner'
-import Reminders from './pages/Reminders'
-import Achievements from './pages/Achievements'
+import AiHub from './pages/AiHub'
+import ProgressHub from './pages/ProgressHub'
 import Profile from './pages/Profile'
 
 function ProtectedLayout({ children }) {
@@ -73,12 +70,14 @@ export default function App() {
       <Route path="/goals" element={<ProtectedLayout><Goals /></ProtectedLayout>} />
       <Route path="/calendar" element={<ProtectedLayout><CalendarPage /></ProtectedLayout>} />
       <Route path="/statistics" element={<ProtectedLayout><Statistics /></ProtectedLayout>} />
-      <Route path="/recommendations" element={<ProtectedLayout><Recommendations /></ProtectedLayout>} />
-      <Route path="/report" element={<ProtectedLayout><AiReport /></ProtectedLayout>} />
-      <Route path="/companion" element={<ProtectedLayout><AiCompanion /></ProtectedLayout>} />
+      <Route path="/ai" element={<ProtectedLayout><AiHub /></ProtectedLayout>} />
+      <Route path="/recommendations" element={<Navigate to="/ai?tab=recommendations" replace />} />
+      <Route path="/report" element={<Navigate to="/ai?tab=report" replace />} />
+      <Route path="/companion" element={<Navigate to="/ai?tab=companion" replace />} />
       <Route path="/day-planner" element={<ProtectedLayout><DayPlanner /></ProtectedLayout>} />
-      <Route path="/reminders" element={<ProtectedLayout><Reminders /></ProtectedLayout>} />
-      <Route path="/achievements" element={<ProtectedLayout><Achievements /></ProtectedLayout>} />
+      <Route path="/progress" element={<ProtectedLayout><ProgressHub /></ProtectedLayout>} />
+      <Route path="/reminders" element={<Navigate to="/progress?tab=reminders" replace />} />
+      <Route path="/achievements" element={<Navigate to="/progress?tab=achievements" replace />} />
       <Route path="/profile" element={<ProtectedLayout><Profile /></ProtectedLayout>} />
 
       <Route path="/" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />} />

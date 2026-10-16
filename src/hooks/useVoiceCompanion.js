@@ -56,6 +56,18 @@ async function toWav(blob) {
       for (let j = start; j < end; j += 1) total += mono[j]
       samples[i] = total / Math.max(1, end - start)
     }
+    let peak = 0
+    let squareTotal = 0
+    for (const sample of samples) {
+      peak = Math.max(peak, Math.abs(sample))
+      squareTotal += sample * sample
+    }
+    const rms = Math.sqrt(squareTotal / Math.max(1, samples.length))
+    if (peak < 0.0005 || rms < 0.0001) {
+      throw new Error('Microphone audio is nearly silent. Check your selected input device and microphone permission.')
+    }
+    const gain = Math.min(8, 0.8 / peak)
+    for (let i = 0; i < samples.length; i += 1) samples[i] *= gain
     return wavFromSamples(samples)
   } finally {
     if (context.state !== 'closed') await context.close()
@@ -66,23 +78,60 @@ export function useVoiceCompanion({ onResult } = {}) {
   const [recording, setRecording] = useState(false)
   const [processing, setProcessing] = useState(false)
   const [speaking, setSpeaking] = useState(false)
+  const [inputLevel, setInputLevel] = useState(0)
   const [error, setError] = useState('')
   const recorderRef = useRef(null)
   const streamRef = useRef(null)
+  const meterContextRef = useRef(null)
+  const meterFrameRef = useRef(null)
   const chunksRef = useRef([])
   const timeoutRef = useRef(null)
   const audioRef = useRef(null)
   const onResultRef = useRef(onResult)
   onResultRef.current = onResult
 
+  const stopInputMeter = useCallback(() => {
+    if (meterFrameRef.current !== null) window.cancelAnimationFrame(meterFrameRef.current)
+    meterFrameRef.current = null
+    const context = meterContextRef.current
+    meterContextRef.current = null
+    if (context && context.state !== 'closed') void context.close()
+    setInputLevel(0)
+  }, [])
+
+  const startInputMeter = useCallback((stream) => {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext
+    if (!AudioContextClass) return
+    const context = new AudioContextClass()
+    const analyser = context.createAnalyser()
+    analyser.fftSize = 1024
+    context.createMediaStreamSource(stream).connect(analyser)
+    const samples = new Float32Array(analyser.fftSize)
+    let lastUpdate = 0
+    meterContextRef.current = context
+    const update = (timestamp) => {
+      if (context.state === 'closed') return
+      analyser.getFloatTimeDomainData(samples)
+      let squareTotal = 0
+      for (const sample of samples) squareTotal += sample * sample
+      if (timestamp - lastUpdate >= 100) {
+        setInputLevel(Math.min(1, Math.sqrt(squareTotal / samples.length) * 8))
+        lastUpdate = timestamp
+      }
+      meterFrameRef.current = window.requestAnimationFrame(update)
+    }
+    meterFrameRef.current = window.requestAnimationFrame(update)
+  }, [])
+
   const releaseMicrophone = useCallback(() => {
     if (timeoutRef.current) window.clearTimeout(timeoutRef.current)
     timeoutRef.current = null
+    stopInputMeter()
     streamRef.current?.getTracks().forEach((track) => track.stop())
     streamRef.current = null
     recorderRef.current = null
     setRecording(false)
-  }, [])
+  }, [stopInputMeter])
 
   const playReply = useCallback(async (reply, audio) => {
     if (audio?.size) {
@@ -147,6 +196,7 @@ export function useVoiceCompanion({ onResult } = {}) {
         audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
       })
       streamRef.current = stream
+      startInputMeter(stream)
       chunksRef.current = []
       const mimeType = typeof MediaRecorder.isTypeSupported === 'function'
         ? MIME_TYPES.find((type) => MediaRecorder.isTypeSupported(type))
@@ -193,7 +243,7 @@ export function useVoiceCompanion({ onResult } = {}) {
       const message = cause instanceof Error ? cause.message : ''
       setError(message || 'Could not access the microphone. Check microphone permissions and try again.')
     }
-  }, [playReply, recording, releaseMicrophone])
+  }, [playReply, recording, releaseMicrophone, startInputMeter])
 
   useEffect(() => () => {
     if (timeoutRef.current) window.clearTimeout(timeoutRef.current)
@@ -202,10 +252,11 @@ export function useVoiceCompanion({ onResult } = {}) {
       recorderRef.current.onerror = null
       if (recorderRef.current.state === 'recording') recorderRef.current.stop()
     }
+    stopInputMeter()
     streamRef.current?.getTracks().forEach((track) => track.stop())
     audioRef.current?.pause()
     window.speechSynthesis?.cancel()
-  }, [])
+  }, [stopInputMeter])
 
-  return { recording, processing, speaking, error, setError, handleRecording }
+  return { recording, processing, speaking, inputLevel, error, setError, handleRecording }
 }

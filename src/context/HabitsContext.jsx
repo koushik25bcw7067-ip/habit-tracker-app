@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState, useCallback, useEffect } from 'react'
+import { createContext, useContext, useMemo, useState, useCallback, useEffect, useRef } from 'react'
 import * as habitsApi from '../api/habits'
 import * as categoriesApi from '../api/categories'
 import * as statsApi from '../api/statistics'
@@ -40,8 +40,11 @@ export function HabitsProvider({ children }) {
   const [statsById, setStatsById] = useState({}) // habit_id -> raw HabitStats (incl. monthly_trend), for Calendar day-detail
   const [categories, setCategories] = useState([])
   const [recommendations, setRecommendations] = useState([])
+  const [recommendationsLoading, setRecommendationsLoading] = useState(false)
+  const [recommendationsError, setRecommendationsError] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const recommendationsRequestRef = useRef(null)
 
   const loadCategories = useCallback(async () => {
     const cats = await categoriesApi.listCategories()
@@ -70,9 +73,29 @@ export function HabitsProvider({ children }) {
   }, [])
 
   const loadRecommendations = useCallback(async () => {
-    const recs = await recApi.listRecommendations()
-    setRecommendations(recs.map(adaptRecommendation))
+    if (recommendationsRequestRef.current) return recommendationsRequestRef.current
+    const request = recApi.listRecommendations().then((recs) => {
+      setRecommendations(recs.map(adaptRecommendation))
+    })
+    recommendationsRequestRef.current = request
+    try {
+      await request
+    } finally {
+      if (recommendationsRequestRef.current === request) recommendationsRequestRef.current = null
+    }
   }, [])
+
+  const refreshRecommendations = useCallback(async () => {
+    setRecommendationsLoading(true)
+    setRecommendationsError(null)
+    try {
+      await loadRecommendations()
+    } catch (err) {
+      setRecommendationsError(err instanceof ApiError ? err.message : 'Failed to load AI recommendations')
+    } finally {
+      setRecommendationsLoading(false)
+    }
+  }, [loadRecommendations])
 
   const refresh = useCallback(async () => {
     setLoading(true)
@@ -93,6 +116,7 @@ export function HabitsProvider({ children }) {
       setHabits([])
       setCategories([])
       setRecommendations([])
+      setRecommendationsError(null)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated])
@@ -279,9 +303,12 @@ export function HabitsProvider({ children }) {
       statsById,
       categories,
       recommendations,
+      recommendationsLoading,
+      recommendationsError,
       loading,
       error,
       refresh,
+      refreshRecommendations,
       addHabit,
       editHabit,
       removeHabit,
@@ -296,9 +323,12 @@ export function HabitsProvider({ children }) {
       statsById,
       categories,
       recommendations,
+      recommendationsLoading,
+      recommendationsError,
       loading,
       error,
       refresh,
+      refreshRecommendations,
       addHabit,
       editHabit,
       removeHabit,

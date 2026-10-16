@@ -48,7 +48,7 @@ export default function AiCompanion() {
   const [sending, setSending] = useState(false)
   const [error, setError] = useState(null)
   const scrollRef = useRef(null)
-  const { recording, processing: voiceBusy, error: voiceError, handleRecording } =
+  const { recording, processing: voiceBusy, inputLevel, error: voiceError, handleRecording } =
     useVoiceCompanion({
       onResult: (result) => {
         setMessages((previous) => [
@@ -146,6 +146,27 @@ export default function AiCompanion() {
           Speak for up to 15 seconds. Changes require a spoken confirmation.
         </span>
       </div>
+      {recording && (
+        <div className="flex items-center gap-2 pb-2" role="status" aria-live="polite">
+          <span className="text-body-sm text-on-surface-variant">Microphone level</span>
+          <div
+            className="h-2 flex-1 overflow-hidden rounded-full bg-surface-container-high"
+            role="meter"
+            aria-label="Microphone input level"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Math.round(inputLevel * 100)}
+          >
+            <div
+              className={`h-full rounded-full transition-[width] duration-100 ${inputLevel < 0.02 ? 'bg-error' : 'bg-tertiary'}`}
+              style={{ width: `${Math.max(inputLevel > 0 ? 3 : 0, inputLevel * 100)}%` }}
+            />
+          </div>
+          <span className="text-body-sm text-on-surface-variant">
+            {inputLevel < 0.02 ? 'No input detected' : 'Input detected'}
+          </span>
+        </div>
+      )}
       {voiceError && (
         <div role="alert" className="text-body-sm text-on-error-container bg-error-container/50 rounded-md px-3 py-2">
           {voiceError}

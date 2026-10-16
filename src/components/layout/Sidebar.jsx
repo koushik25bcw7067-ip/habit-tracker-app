@@ -12,11 +12,8 @@ const NAV_ITEMS = [
   { path: '/calendar', label: 'Calendar', icon: 'calendar_month' },
   { path: '/day-planner', label: 'Day Planner', icon: 'event_note' },
   { path: '/statistics', label: 'Statistics', icon: 'bar_chart' },
-  { path: '/recommendations', label: 'AI Recommendations', icon: 'auto_awesome' },
-  { path: '/report', label: 'AI Report', icon: 'summarize' },
-  { path: '/companion', label: 'AI Companion', icon: 'forum' },
-  { path: '/reminders', label: 'Reminders', vk: 'reminders', icon: 'notifications' },
-  { path: '/achievements', label: 'Achievements', vk: 'achievements', icon: 'emoji_events' },
+  { path: '/ai', label: 'AI Hub', icon: 'auto_awesome' },
+  { path: '/progress', label: 'My Progress', icon: 'monitoring' },
   { path: '/profile', label: 'Profile', icon: 'person' },
 ]
 
@@ -26,10 +23,14 @@ export default function Sidebar() {
   return (
     <aside className="hidden md:flex fixed left-0 top-0 h-full w-64 flex-col border-r border-surface-container-high bg-surface-container-lowest px-4 py-6 gap-6 z-40">
       <div className="flex items-center gap-2.5 px-2">
-        <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-          <Icon name="auto_awesome" size={20} className="text-on-primary" />
+        <div className="relative flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-secondary shadow-card-1">
+          <Icon name="face_3" size={23} className="text-on-primary" />
+          <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-surface-container-lowest bg-tertiary" />
         </div>
-        <span className="font-display text-headline-sm text-on-surface">Mini AI</span>
+        <div className="flex min-w-0 flex-col leading-tight">
+          <span className="font-display text-headline-sm text-on-surface">Mini AI</span>
+          <span className="text-[9px] font-bold tracking-[0.16em] text-primary">COMPANION</span>
+        </div>
       </div>
 
       <nav className="flex flex-col gap-1 flex-1">

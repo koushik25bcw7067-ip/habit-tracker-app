@@ -8,7 +8,7 @@ const NAV_ITEMS = [
   { path: '/tasks', label: 'Tasks', vk: 'tasks', icon: 'task_alt' },
   { path: '/calendar', label: 'Calendar', icon: 'calendar_month' },
   { path: '/statistics', label: 'Statistics', icon: 'bar_chart' },
-  { path: '/companion', label: 'Companion', icon: 'auto_awesome', dot: true },
+  { path: '/ai', label: 'AI Hub', icon: 'auto_awesome' },
 ]
 
 export default function BottomNav() {

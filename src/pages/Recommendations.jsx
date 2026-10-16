@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Icon from '../components/ui/Icon'
 import PageHeader from '../components/PageHeader'
 import RecommendationCard from '../components/RecommendationCard'
@@ -12,8 +12,18 @@ const TABS = [
 ]
 
 export default function Recommendations() {
-  const { recommendations, respondRecommendation, loading, error, refresh } = useHabits()
+  const {
+    recommendations,
+    respondRecommendation,
+    recommendationsLoading,
+    recommendationsError,
+    refreshRecommendations,
+  } = useHabits()
   const [tab, setTab] = useState('all')
+
+  useEffect(() => {
+    refreshRecommendations()
+  }, [refreshRecommendations])
 
   const filtered = useMemo(() => {
     if (tab === 'all') return recommendations
@@ -57,10 +67,10 @@ export default function Recommendations() {
       </div>
 
       <div className="flex flex-col gap-3">
-        {loading && recommendations.length === 0 ? (
+        {recommendationsLoading && recommendations.length === 0 ? (
           <LoadingState label="Generating recommendations…" />
-        ) : error ? (
-          <ErrorState description={error} onRetry={refresh} />
+        ) : recommendationsError ? (
+          <ErrorState description={recommendationsError} onRetry={refreshRecommendations} />
         ) : filtered.length === 0 ? (
           <EmptyState icon="auto_awesome" title="Nothing here yet" description="Check back after your next routine check-in." />
         ) : (

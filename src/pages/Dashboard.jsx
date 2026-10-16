@@ -306,7 +306,7 @@ export default function Dashboard() {
             </Link>
           )}
           {xp && (
-            <Link to="/achievements">
+            <Link to="/progress?tab=achievements">
               <Card className="p-3.5 h-full flex flex-col justify-center gap-1">
                 <div className="flex items-center justify-between">
                   <span className="text-label-sm font-bold text-tertiary-strong uppercase tracking-wide">XP</span>
@@ -346,7 +346,7 @@ export default function Dashboard() {
       {topRecommendation && (
         <section>
           <Link
-            to="/recommendations"
+            to="/ai?tab=recommendations"
             className="flex items-start gap-3 bg-gradient-to-br from-secondary-fixed/50 to-primary-fixed/50 rounded-xl p-4 border border-secondary-container/30"
           >
             <div className="w-9 h-9 rounded-lg bg-surface-container-lowest/80 flex items-center justify-center flex-shrink-0">
