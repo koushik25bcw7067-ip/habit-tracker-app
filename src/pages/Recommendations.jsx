@@ -19,7 +19,7 @@ export default function Recommendations() {
     recommendationsError,
     refreshRecommendations,
   } = useHabits()
-  const [tab, setTab] = useState('all')
+  const [tab, setTab] = useState('pending')
 
   useEffect(() => {
     refreshRecommendations()
@@ -38,10 +38,12 @@ export default function Recommendations() {
       <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary via-primary to-secondary p-5 text-on-primary shadow-card-2 mt-2">
         <div className="absolute -right-8 -top-8 w-32 h-32 rounded-full bg-on-primary/10 blur-2xl pointer-events-none" />
         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-on-primary/15 text-label-sm font-semibold">
-          <Icon name="auto_awesome" size={13} /> CIRCADIAN ENGINE V2.4
+          <Icon name="auto_awesome" size={13} /> AI ROUTINE INSIGHTS
         </span>
-        <h1 className="font-display text-headline-lg mt-2">Personalized for you ✨</h1>
-        <p className="text-body-md mt-1 text-on-primary/90">Actionable routine adjustments calculated from your circadian pattern and exam schedule.</p>
+        <h1 className="font-display text-headline-lg mt-2">Recommendations</h1>
+        <p className="text-body-md mt-1 text-on-primary/90">
+          A short list of suggestions based on your routine activity and completion history.
+        </p>
         <div className="flex items-center gap-2 mt-3">
           <span className="px-2.5 py-1 rounded-full bg-on-primary/15 text-label-sm font-semibold flex items-center gap-1">
             <Icon name="trending_up" size={13} /> {pendingCount} Pending
@@ -72,7 +74,17 @@ export default function Recommendations() {
         ) : recommendationsError ? (
           <ErrorState description={recommendationsError} onRetry={refreshRecommendations} />
         ) : filtered.length === 0 ? (
-          <EmptyState icon="auto_awesome" title="Nothing here yet" description="Check back after your next routine check-in." />
+          <EmptyState
+            icon="auto_awesome"
+            title={tab === 'pending' ? 'You’re all caught up' : tab === 'accepted' ? 'No accepted recommendations yet' : 'No recommendations yet'}
+            description={
+              tab === 'pending'
+                ? 'There are no suggestions to review right now. New ones appear when your routine history shows a useful pattern.'
+                : tab === 'accepted'
+                  ? 'Recommendations you accept will appear here.'
+                  : 'Keep logging your routines and useful suggestions will appear here.'
+            }
+          />
         ) : (
           filtered.map((r) => (
             <RecommendationCard
