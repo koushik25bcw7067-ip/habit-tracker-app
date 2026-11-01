@@ -133,8 +133,11 @@ export function useVoiceCompanion({ onResult } = {}) {
     setRecording(false)
   }, [stopInputMeter])
 
-  const playReply = useCallback(async (reply, audio) => {
-    if (audio?.size) {
+  const playReply = useCallback(async (reply, audio, audioMode) => {
+    if (audioMode === 'fallback') {
+      setError('Gemini speech is temporarily rate-limited. Using your browser voice.')
+    }
+    if (audio?.size && audioMode !== 'fallback') {
       const url = URL.createObjectURL(audio)
       const player = new Audio(url)
       audioRef.current = player
@@ -221,7 +224,7 @@ export function useVoiceCompanion({ onResult } = {}) {
           }
           onResultRef.current?.(result)
           if (result.status === 'completed' && result.actionType) emitCompanionAction(result.actionType)
-          await playReply(result.reply, result.audio)
+          await playReply(result.reply, result.audio, result.audioMode)
         } catch (cause) {
           setError(cause instanceof Error ? cause.message : 'Could not process the recording. Please try again.')
         } finally {

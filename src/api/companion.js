@@ -61,6 +61,7 @@ export async function sendVoiceTurn(wavAudio) {
       status: fallback.status,
       actionId: fallback.action_id,
       actionType: fallback.action_type,
+      audioMode: 'fallback',
     }
   }
   const decodeHeader = (name) => {
@@ -75,5 +76,6 @@ export async function sendVoiceTurn(wavAudio) {
     actionId: response.headers.get('X-Companion-Action-Id'),
     actionType: response.headers.get('X-Companion-Action-Type'),
     conversationId: response.headers.get('X-Companion-Conversation-Id'),
+    audioMode: response.headers.get('X-Companion-Audio-Mode') || 'tts',
   }
 }
