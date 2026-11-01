@@ -259,11 +259,11 @@ export default function Profile() {
             </Button>
           </div>
           <p className="text-body-sm text-on-surface-variant">
-            Pair using a short-lived code. The device gets its own revocable credential; your website password and login tokens are never placed on it.
+            Generate a short-lived pairing code, copy it into PAIRING_CODE in the ESP32 sketch, then upload it. The device gets its own revocable credential saved in flash; your website password and login tokens are never placed on it. Clear PAIRING_CODE from the sketch after pairing.
           </p>
           {pairing && (
             <div className="rounded-lg bg-surface-container-low p-3" role="status">
-              <p className="text-body-sm text-on-surface-variant">Enter this code on your device within 5 minutes:</p>
+              <p className="text-body-sm text-on-surface-variant">Copy this code to PAIRING_CODE in the ESP32 sketch and upload within 5 minutes:</p>
               <p className="font-mono text-headline-sm tracking-[0.2em] text-on-surface" aria-label="Device pairing code">
                 {pairing.pairing_code}
               </p>

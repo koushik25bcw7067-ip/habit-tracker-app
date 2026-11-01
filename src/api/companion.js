@@ -74,5 +74,6 @@ export async function sendVoiceTurn(wavAudio) {
     status: response.headers.get('X-Companion-Status'),
     actionId: response.headers.get('X-Companion-Action-Id'),
     actionType: response.headers.get('X-Companion-Action-Type'),
+    conversationId: response.headers.get('X-Companion-Conversation-Id'),
   }
 }
